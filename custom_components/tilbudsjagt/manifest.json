@@ -1,0 +1,18 @@
+{
+  "domain": "tilbudsjagt",
+  "name": "Tilbudsjagt",
+  "codeowners": [
+    "@YOUR_GITHUB_USER"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "documentation": "https://github.com/YOUR_GITHUB_USER/tilbudsjagt",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/YOUR_GITHUB_USER/tilbudsjagt/issues",
+  "requirements": [],
+  "version": "0.0.0"
+}

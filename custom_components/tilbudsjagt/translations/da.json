@@ -1,0 +1,80 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Tilføj vare",
+        "description": "Søg efter en vare på tilbudsugen.dk.",
+        "data": {
+          "search": "Vare",
+          "name": "Navn (valgfrit)"
+        },
+        "data_description": {
+          "search": "Fx 'pepsi max', 'coca cola' eller en hel tilbudsugen.dk/offer/…-adresse.",
+          "name": "Vises på enheden og kortet. Standard er varen."
+        }
+      },
+      "filters": {
+        "title": "Filtre",
+        "description": "Fandt tilbud fra {chains} kæder. Vælg hvad du vil se.",
+        "data": {
+          "name_contains": "Navnet skal indeholde",
+          "name_excludes": "Navnet må ikke indeholde",
+          "unit": "Enhed",
+          "min_units": "Mindste antal pr. tilbud",
+          "exclude_chains": "Udeluk kæder",
+          "include_border": "Medtag grænsehandel",
+          "one_per_chain": "Kun billigste tilbud pr. kæde",
+          "max_results": "Antal tilbud",
+          "update_hours": "Opdateringsinterval (timer)"
+        },
+        "data_description": {
+          "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
+          "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
+          "min_units": "Fx 24 for kun kasser/rammer.",
+          "exclude_chains": "Vælg fra listen eller skriv en del af navnet."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke hente eller læse tilbudsugen.dk.",
+      "no_offers": "Ingen tilbud fundet på varen."
+    },
+    "abort": {
+      "already_configured": "Varen er allerede tilføjet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Filtre",
+        "data": {
+          "name_contains": "Navnet skal indeholde",
+          "name_excludes": "Navnet må ikke indeholde",
+          "unit": "Enhed",
+          "min_units": "Mindste antal pr. tilbud",
+          "exclude_chains": "Udeluk kæder",
+          "include_border": "Medtag grænsehandel",
+          "one_per_chain": "Kun billigste tilbud pr. kæde",
+          "max_results": "Antal tilbud",
+          "update_hours": "Opdateringsinterval (timer)"
+        },
+        "data_description": {
+          "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
+          "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
+          "min_units": "Fx 24 for kun kasser/rammer.",
+          "exclude_chains": "Vælg fra listen eller skriv en del af navnet."
+        }
+      }
+    }
+  },
+  "selector": {
+    "unit": {
+      "options": {
+        "ltr.": "Pr. liter",
+        "kg.": "Pr. kg",
+        "stk.": "Pr. stk.",
+        "alle": "Alle (intet enhedsfilter)"
+      }
+    }
+  }
+}

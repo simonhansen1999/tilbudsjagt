@@ -1,0 +1,80 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add product",
+        "description": "Search for a product on tilbudsugen.dk.",
+        "data": {
+          "search": "Product",
+          "name": "Name (optional)"
+        },
+        "data_description": {
+          "search": "E.g. 'pepsi max', 'coca cola' or a full tilbudsugen.dk/offer/… URL.",
+          "name": "Shown on the device and card. Defaults to the product."
+        }
+      },
+      "filters": {
+        "title": "Filters",
+        "description": "Found offers from {chains} chains. Choose what to show.",
+        "data": {
+          "name_contains": "Name must contain",
+          "name_excludes": "Name must not contain",
+          "unit": "Unit",
+          "min_units": "Minimum units per offer",
+          "exclude_chains": "Exclude chains",
+          "include_border": "Include border shops",
+          "one_per_chain": "Only cheapest offer per chain",
+          "max_results": "Number of offers",
+          "update_hours": "Update interval (hours)"
+        },
+        "data_description": {
+          "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
+          "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
+          "min_units": "E.g. 24 for crates only.",
+          "exclude_chains": "Pick from the list or type part of a name."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not fetch or read tilbudsugen.dk.",
+      "no_offers": "No offers found for this product."
+    },
+    "abort": {
+      "already_configured": "This product is already added."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Filters",
+        "data": {
+          "name_contains": "Name must contain",
+          "name_excludes": "Name must not contain",
+          "unit": "Unit",
+          "min_units": "Minimum units per offer",
+          "exclude_chains": "Exclude chains",
+          "include_border": "Include border shops",
+          "one_per_chain": "Only cheapest offer per chain",
+          "max_results": "Number of offers",
+          "update_hours": "Update interval (hours)"
+        },
+        "data_description": {
+          "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
+          "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
+          "min_units": "E.g. 24 for crates only.",
+          "exclude_chains": "Pick from the list or type part of a name."
+        }
+      }
+    }
+  },
+  "selector": {
+    "unit": {
+      "options": {
+        "ltr.": "Per litre",
+        "kg.": "Per kg",
+        "stk.": "Per piece",
+        "alle": "All (no unit filter)"
+      }
+    }
+  }
+}

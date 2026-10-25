@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sæt version fra tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd custom_components/tilbudsjagt
+          jq --arg v "$VERSION" '.version = $v' manifest.json > manifest.tmp
+          mv manifest.tmp manifest.json
+          sed -i "s/__VERSION__/$VERSION/" frontend/tilbudsjagt-card.js
+
+      - name: Pak integrationen
+        run: |
+          cd custom_components/tilbudsjagt
+          zip -r "$GITHUB_WORKSPACE/tilbudsjagt.zip" . -x "__pycache__/*"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: tilbudsjagt.zip
+          generate_release_notes: true
