@@ -21,27 +21,25 @@ async def async_setup_entry(
     entry: TilbudsjagtConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    async_add_entities([TilbudsjagtSensor(entry.runtime_data, entry)])
+    coordinator = entry.runtime_data
+    async_add_entities(
+        [TilbudsjagtSensor(coordinator, entry), CheapestStoreSensor(coordinator, entry)]
+    )
 
 
-class TilbudsjagtSensor(CoordinatorEntity[TilbudsjagtCoordinator], SensorEntity):
-    """Billigste enhedspris. Alle viste tilbud ligger i attributten 'offers'."""
+def _unit_text(coordinator: TilbudsjagtCoordinator) -> str:
+    unit = coordinator.options["unit"]
+    return f"kr/{UNIT_SHORT[unit]}" if unit in UNIT_SHORT else "kr"
+
+
+class TilbudsjagtEntity(CoordinatorEntity[TilbudsjagtCoordinator]):
+    """Fælles enhed for sensorerne."""
 
     _attr_has_entity_name = True
-    _attr_name = None
     _attr_attribution = ATTRIBUTION
-    _attr_icon = "mdi:tag-heart"
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision = 2
-    _unrecorded_attributes = frozenset({"offers", "chains"})
 
     def __init__(self, coordinator: TilbudsjagtCoordinator, entry: TilbudsjagtConfigEntry) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = entry.entry_id
-        unit = coordinator.options["unit"]
-        self._attr_native_unit_of_measurement = (
-            f"kr/{UNIT_SHORT[unit]}" if unit in UNIT_SHORT else "kr"
-        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name=entry.title,
@@ -49,6 +47,21 @@ class TilbudsjagtSensor(CoordinatorEntity[TilbudsjagtCoordinator], SensorEntity)
             entry_type=DeviceEntryType.SERVICE,
             configuration_url=f"{BASE_URL}/offer/{coordinator.slug}",
         )
+
+
+class TilbudsjagtSensor(TilbudsjagtEntity, SensorEntity):
+    """Billigste enhedspris. Alle viste tilbud ligger i attributten 'offers'."""
+
+    _attr_name = None
+    _attr_icon = "mdi:tag-heart"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 2
+    _unrecorded_attributes = frozenset({"offers", "chains"})
+
+    def __init__(self, coordinator: TilbudsjagtCoordinator, entry: TilbudsjagtConfigEntry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = entry.entry_id
+        self._attr_native_unit_of_measurement = _unit_text(coordinator)
 
     @property
     def native_value(self) -> float | None:
@@ -65,4 +78,34 @@ class TilbudsjagtSensor(CoordinatorEntity[TilbudsjagtCoordinator], SensorEntity)
             "unit": self.coordinator.options["unit"],
             "url": f"{BASE_URL}/offer/{self.coordinator.slug}",
             "last_fetch": data.fetched.isoformat(),
+        }
+
+
+class CheapestStoreSensor(TilbudsjagtEntity, SensorEntity):
+    """Kæden med den laveste enhedspris. Alle kæders priser ligger i 'prices'."""
+
+    _attr_translation_key = "cheapest_store"
+    _attr_icon = "mdi:store-marker"
+    _unrecorded_attributes = frozenset({"prices"})
+
+    def __init__(self, coordinator: TilbudsjagtCoordinator, entry: TilbudsjagtConfigEntry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_cheapest_store"
+
+    @property
+    def native_value(self) -> str | None:
+        per_chain = self.coordinator.data.per_chain
+        return per_chain[0].chain if per_chain else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        per_chain = self.coordinator.data.per_chain
+        best = per_chain[0] if per_chain else None
+        return {
+            "unit_price": best.unit_price if best else None,
+            "price": best.price if best else None,
+            "product": best.name if best else None,
+            "url": best.url if best else None,
+            "price_unit": _unit_text(self.coordinator),
+            "prices": {o.chain: o.unit_price for o in per_chain},
         }

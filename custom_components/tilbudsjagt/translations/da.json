@@ -76,5 +76,12 @@
         "alle": "Alle (intet enhedsfilter)"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "cheapest_store": {
+        "name": "Billigste butik"
+      }
+    }
   }
 }

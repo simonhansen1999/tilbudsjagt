@@ -117,8 +117,8 @@ def _words(text: str) -> list[str]:
     return [w.strip().lower() for w in text.split(",") if w.strip()]
 
 
-def filter_offers(offers: list[Offer], opts: dict[str, Any], today: str) -> list[Offer]:
-    """Filtrér, sortér efter enhedspris og begræns antallet."""
+def match_offers(offers: list[Offer], opts: dict[str, Any], today: str) -> list[Offer]:
+    """Tilbud der opfylder filtrene, sorteret efter enhedspris."""
     must = _words(opts["name_contains"])
     exclude = _words(opts["name_excludes"])
     chains = [c.lower() for c in opts["exclude_chains"]]
@@ -137,9 +137,16 @@ def filter_offers(offers: list[Offer], opts: dict[str, Any], today: str) -> list
         and not any(c in o.chain.lower() for c in chains)
     ]
     result.sort(key=lambda o: (o.unit_price, o.price))
+    return result
 
-    if opts["one_per_chain"]:
-        seen: set[str] = set()
-        result = [o for o in result if not (o.chain in seen or seen.add(o.chain))]
 
+def cheapest_per_chain(offers: list[Offer]) -> list[Offer]:
+    """Billigste tilbud pr. kæde. Forventer en sorteret liste."""
+    seen: set[str] = set()
+    return [o for o in offers if not (o.chain in seen or seen.add(o.chain))]
+
+
+def top_offers(matched: list[Offer], opts: dict[str, Any]) -> list[Offer]:
+    """De tilbud der vises på kortet."""
+    result = cheapest_per_chain(matched) if opts["one_per_chain"] else matched
     return result[: int(opts["max_results"])]

@@ -12,7 +12,14 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .api import Offer, TilbudsugenError, async_fetch_offers, filter_offers
+from .api import (
+    Offer,
+    TilbudsugenError,
+    async_fetch_offers,
+    cheapest_per_chain,
+    match_offers,
+    top_offers,
+)
 from .const import CONF_SLUG, CONF_UPDATE_HOURS, DEFAULTS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,6 +30,7 @@ type TilbudsjagtConfigEntry = ConfigEntry[TilbudsjagtCoordinator]
 @dataclass
 class TilbudsjagtData:
     offers: list[Offer]
+    per_chain: list[Offer]
     chains: list[str]
     total: int
     fetched: datetime
@@ -48,9 +56,10 @@ class TilbudsjagtCoordinator(DataUpdateCoordinator[TilbudsjagtData]):
         except TilbudsugenError as err:
             raise UpdateFailed(str(err)) from err
 
-        today = dt_util.now().date().isoformat()
+        matched = match_offers(offers, self.options, dt_util.now().date().isoformat())
         return TilbudsjagtData(
-            offers=filter_offers(offers, self.options, today),
+            offers=top_offers(matched, self.options),
+            per_chain=cheapest_per_chain(matched),
             chains=sorted({o.chain for o in offers if o.chain}),
             total=len(offers),
             fetched=dt_util.utcnow(),

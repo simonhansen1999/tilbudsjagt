@@ -76,5 +76,12 @@
         "alle": "All (no unit filter)"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "cheapest_store": {
+        "name": "Cheapest store"
+      }
+    }
   }
 }
