@@ -2,7 +2,7 @@
   "domain": "tilbudsjagt",
   "name": "Tilbudsjagt",
   "categories": [
-    "productivity_information.shopping_groceries"
+    "productivity_information"
   ],
   "codeowners": [
     "@simonhansen1999"
