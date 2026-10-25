@@ -20,9 +20,11 @@
           "name_contains": "Name must contain",
           "name_excludes": "Name must not contain",
           "unit": "Unit",
+          "package": "Packaging",
           "min_units": "Minimum units per offer",
           "exclude_chains": "Exclude chains",
           "include_border": "Include border shops",
+          "include_deposit": "Include deposit (pant)",
           "one_per_chain": "Only cheapest offer per chain",
           "max_results": "Number of offers",
           "update_hours": "Update interval (hours)"
@@ -31,7 +33,8 @@
           "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
           "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
           "min_units": "E.g. 24 for crates only.",
-          "exclude_chains": "Pick from the list or type part of a name."
+          "exclude_chains": "Pick from the list or type part of a name.",
+          "include_deposit": "Adds Danish bottle/can deposit to price and price per litre. Material is estimated from size."
         }
       }
     },
@@ -51,9 +54,11 @@
           "name_contains": "Name must contain",
           "name_excludes": "Name must not contain",
           "unit": "Unit",
+          "package": "Packaging",
           "min_units": "Minimum units per offer",
           "exclude_chains": "Exclude chains",
           "include_border": "Include border shops",
+          "include_deposit": "Include deposit (pant)",
           "one_per_chain": "Only cheapest offer per chain",
           "max_results": "Number of offers",
           "update_hours": "Update interval (hours)"
@@ -62,7 +67,8 @@
           "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
           "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
           "min_units": "E.g. 24 for crates only.",
-          "exclude_chains": "Pick from the list or type part of a name."
+          "exclude_chains": "Pick from the list or type part of a name.",
+          "include_deposit": "Adds Danish bottle/can deposit to price and price per litre. Material is estimated from size."
         }
       }
     }
@@ -74,6 +80,13 @@
         "kg": "Per kg",
         "stk": "Per piece",
         "alle": "All (no unit filter)"
+      }
+    },
+    "package": {
+      "options": {
+        "alle": "All",
+        "ds": "Cans",
+        "fl": "Bottles"
       }
     }
   },

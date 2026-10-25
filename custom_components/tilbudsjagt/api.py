@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 import re
 from typing import Any
@@ -14,6 +14,8 @@ from .const import BASE_URL, CHAIN_LOGOS, UNIT_ALL, USER_AGENT
 _NEXT_DATA_RE = re.compile(
     r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', re.DOTALL
 )
+_LIMIT_RE = re.compile(r"\bma(?:ks|x)\.?\s*(\d+)", re.IGNORECASE)
+_NOTE_NAMES = {"fl. var.": "Flere varianter"}
 
 
 class TilbudsugenError(Exception):
@@ -31,10 +33,15 @@ class Offer:
     unit_price: float
     unit: str
     units: int
+    package: str
     size: float
     start: str
     end: str
     border_shop: bool
+    limit: int | None = None
+    notes: tuple[str, ...] = ()
+    deposit: float = 0.0
+    deposit_included: bool = False
 
     @property
     def url(self) -> str:
@@ -96,6 +103,7 @@ def _parse(item: dict[str, Any]) -> Offer | None:
     try:
         brand = (item.get("brand") or {}).get("name") or ""
         product = (item.get("productName") or {}).get("productName") or ""
+        limit, notes = _parse_notes(item.get("definedDescription") or [])
         return Offer(
             id=str(item["id"]),
             chain=(item.get("chain") or {}).get("name") or "",
@@ -104,13 +112,65 @@ def _parse(item: dict[str, Any]) -> Offer | None:
             unit_price=float(item.get("pricePerFullUnitOfQuantityType") or 0),
             unit=(item.get("quantityType") or "").rstrip("."),
             units=int(item.get("units") or 1),
+            package=(item.get("unitType") or "").rstrip("."),
             size=float(item.get("quantity") or 0),
             start=str(item.get("startDate") or "")[:10],
             end=str(item.get("endDate") or "")[:10],
             border_shop=bool(item.get("isBorderShop")),
+            limit=limit,
+            notes=notes,
+            deposit=_deposit(item),
         )
     except (KeyError, TypeError, ValueError):
         return None
+
+
+def _deposit(item: dict[str, Any]) -> float:
+    """Samlet pant for tilbuddet ud fra emballage og størrelse.
+
+    Pant A 1 kr: dåser og glasflasker under 1 l.
+    Pant B 1,50 kr: plastflasker under 1 l.
+    Pant C 3 kr: flasker og dåser på 1 l eller mere.
+    Materialet står ikke i dataene, så flasker til og med 33 cl regnes som glas
+    og større flasker under 1 l som plast.
+    """
+    package = (item.get("unitType") or "").rstrip(".")
+    if (item.get("quantityType") or "").rstrip(".") != "ltr" or package not in ("ds", "fl"):
+        return 0.0
+    size = float(item.get("quantity") or 0)
+    if size >= 1:
+        each = 3.0
+    elif package == "ds" or size <= 0.33:
+        each = 1.0
+    else:
+        each = 1.5
+    return each * int(item.get("units") or 1)
+
+
+def with_deposit(offer: Offer) -> Offer:
+    """Tilbuddet med pant lagt oven i pris og enhedspris."""
+    volume = offer.units * offer.size
+    if not offer.deposit or not volume:
+        return offer
+    price = offer.price + offer.deposit
+    return replace(
+        offer, price=price, unit_price=round(price / volume, 2), deposit_included=True
+    )
+
+
+def _parse_notes(described: list[dict[str, Any]]) -> tuple[int | None, tuple[str, ...]]:
+    """Find en evt. grænse pr. kunde og de øvrige noter."""
+    limit: int | None = None
+    notes: list[str] = []
+    for entry in described:
+        value = str((entry or {}).get("value") or "").strip()
+        if not value:
+            continue
+        if match := _LIMIT_RE.search(value):
+            limit = int(match.group(1))
+        else:
+            notes.append(_NOTE_NAMES.get(value.lower(), value))
+    return limit, tuple(notes)
 
 
 def _words(text: str) -> list[str]:
@@ -123,12 +183,16 @@ def match_offers(offers: list[Offer], opts: dict[str, Any], today: str) -> list[
     exclude = _words(opts["name_excludes"])
     chains = [c.lower() for c in opts["exclude_chains"]]
     unit = opts["unit"]
+    package = opts["package"]
+    if opts["include_deposit"]:
+        offers = [with_deposit(o) for o in offers]
 
     result = [
         o
         for o in offers
         if o.unit_price > 0
         and (unit == UNIT_ALL or o.unit == unit)
+        and (package == UNIT_ALL or o.package == package)
         and (opts["include_border"] or not o.border_shop)
         and (not o.end or o.end >= today)
         and o.units >= opts["min_units"]

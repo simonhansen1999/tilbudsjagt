@@ -20,9 +20,11 @@
           "name_contains": "Navnet skal indeholde",
           "name_excludes": "Navnet må ikke indeholde",
           "unit": "Enhed",
+          "package": "Emballage",
           "min_units": "Mindste antal pr. tilbud",
           "exclude_chains": "Udeluk kæder",
           "include_border": "Medtag grænsehandel",
+          "include_deposit": "Medregn pant",
           "one_per_chain": "Kun billigste tilbud pr. kæde",
           "max_results": "Antal tilbud",
           "update_hours": "Opdateringsinterval (timer)"
@@ -31,7 +33,8 @@
           "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
           "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
           "min_units": "Fx 24 for kun kasser/rammer.",
-          "exclude_chains": "Vælg fra listen eller skriv en del af navnet."
+          "exclude_chains": "Vælg fra listen eller skriv en del af navnet.",
+          "include_deposit": "Lægger pant oven i pris og literpris. Materialet gættes ud fra størrelsen."
         }
       }
     },
@@ -51,9 +54,11 @@
           "name_contains": "Navnet skal indeholde",
           "name_excludes": "Navnet må ikke indeholde",
           "unit": "Enhed",
+          "package": "Emballage",
           "min_units": "Mindste antal pr. tilbud",
           "exclude_chains": "Udeluk kæder",
           "include_border": "Medtag grænsehandel",
+          "include_deposit": "Medregn pant",
           "one_per_chain": "Kun billigste tilbud pr. kæde",
           "max_results": "Antal tilbud",
           "update_hours": "Opdateringsinterval (timer)"
@@ -62,7 +67,8 @@
           "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
           "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
           "min_units": "Fx 24 for kun kasser/rammer.",
-          "exclude_chains": "Vælg fra listen eller skriv en del af navnet."
+          "exclude_chains": "Vælg fra listen eller skriv en del af navnet.",
+          "include_deposit": "Lægger pant oven i pris og literpris. Materialet gættes ud fra størrelsen."
         }
       }
     }
@@ -74,6 +80,13 @@
         "kg": "Pr. kg",
         "stk": "Pr. stk.",
         "alle": "Alle (intet enhedsfilter)"
+      }
+    },
+    "package": {
+      "options": {
+        "alle": "Alle",
+        "ds": "Dåser",
+        "fl": "Flasker"
       }
     }
   },

@@ -24,18 +24,21 @@ from .api import TilbudsugenError, async_fetch_offers, normalize_search
 from .const import (
     CONF_EXCLUDE_CHAINS,
     CONF_INCLUDE_BORDER,
+    CONF_INCLUDE_DEPOSIT,
     CONF_MAX_RESULTS,
     CONF_MIN_UNITS,
     CONF_NAME,
     CONF_NAME_CONTAINS,
     CONF_NAME_EXCLUDES,
     CONF_ONE_PER_CHAIN,
+    CONF_PACKAGE,
     CONF_SEARCH,
     CONF_SLUG,
     CONF_UNIT,
     CONF_UPDATE_HOURS,
     DEFAULTS,
     DOMAIN,
+    PACKAGES,
     UNITS,
 )
 
@@ -58,6 +61,11 @@ def _filter_schema(chains: list[str], current: dict[str, Any]) -> vol.Schema:
                     options=UNITS, mode=SelectSelectorMode.DROPDOWN, translation_key="unit"
                 )
             ),
+            vol.Required(CONF_PACKAGE, default=opts[CONF_PACKAGE]): SelectSelector(
+                SelectSelectorConfig(
+                    options=PACKAGES, mode=SelectSelectorMode.DROPDOWN, translation_key="package"
+                )
+            ),
             vol.Required(CONF_MIN_UNITS, default=opts[CONF_MIN_UNITS]): _number(1, 100),
             vol.Optional(CONF_EXCLUDE_CHAINS, default=opts[CONF_EXCLUDE_CHAINS]): SelectSelector(
                 SelectSelectorConfig(
@@ -68,6 +76,7 @@ def _filter_schema(chains: list[str], current: dict[str, Any]) -> vol.Schema:
                 )
             ),
             vol.Required(CONF_INCLUDE_BORDER, default=opts[CONF_INCLUDE_BORDER]): BooleanSelector(),
+            vol.Required(CONF_INCLUDE_DEPOSIT, default=opts[CONF_INCLUDE_DEPOSIT]): BooleanSelector(),
             vol.Required(CONF_ONE_PER_CHAIN, default=opts[CONF_ONE_PER_CHAIN]): BooleanSelector(),
             vol.Required(CONF_MAX_RESULTS, default=opts[CONF_MAX_RESULTS]): _number(1, 20),
             vol.Required(CONF_UPDATE_HOURS, default=opts[CONF_UPDATE_HOURS]): _number(1, 24),

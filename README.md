@@ -21,22 +21,33 @@ Indstillinger → Enheder & tjenester → Tilføj integration → **Tilbudsjagt*
    - **Navnet skal indeholde**: fx `pepsi, max`
    - **Navnet må ikke indeholde**: fx `sodastream, koncentrat, lime`
    - **Enhed**: pr. liter, kg, stk. eller alle
+   - **Emballage**: alle, dåser eller flasker
    - **Mindste antal pr. tilbud**: fx `24` for kun kasser/rammer
    - **Udeluk kæder**: vælg fra listen
    - **Medtag grænsehandel**
+   - **Medregn pant**: lægger pant oven i pris og literpris (dåser og glas under 1 l: 1 kr, plast under 1 l: 1,50 kr, 1 l og derover: 3 kr). Materialet står ikke i dataene, så flasker til og med 33 cl regnes som glas
    - **Kun billigste tilbud pr. kæde**
    - **Antal tilbud** og **opdateringsinterval** (standard 12 timer)
 
 Tilføj flere varer ved at køre opsætningen igen. Filtrene kan ændres senere under **Konfigurér**.
 
-## Sensor
+## Sensorer
 
-Én sensor pr. vare, fx `sensor.pepsi_max`:
+To sensorer pr. vare, fx for Pepsi Max:
 
-- **Tilstand**: billigste enhedspris (kr/l, kr/kg eller kr/stk)
-- **Attributter**:
-  - `offers`: liste med `chain`, `name`, `price`, `unit_price`, `units`, `size`, `start`, `end`, `url`, `logo`
-  - `chains`, `total_offers`, `unit`, `url`, `last_fetch`
+- `sensor.pepsi_max`
+  - **Tilstand**: billigste enhedspris (kr/l, kr/kg eller kr/stk)
+  - **Attributter**: `offers` (de viste tilbud med `chain`, `name`, `price`, `unit_price`, `units`, `package`, `size`, `start`, `end`, `limit`, `notes`, `deposit`, `deposit_included`, `url`, `logo`), `chains`, `total_offers`, `unit`, `include_deposit`, `url`, `last_fetch`
+- `sensor.pepsi_max_billigste_butik`
+  - **Tilstand**: kæden med den laveste enhedspris, fx `Meny`
+  - **Attributter**: `unit_price`, `price`, `product`, `url`, `price_unit` og `prices` med billigste enhedspris for **alle** kæder, der opfylder filtrene
+
+Eksempel i en skabelon:
+
+```jinja
+{{ states('sensor.pepsi_max_billigste_butik') }} –
+{{ state_attr('sensor.pepsi_max_billigste_butik', 'unit_price') }} kr/l
+```
 
 ## Kort
 
@@ -56,10 +67,10 @@ max_rows: 5
 |---|---|---|
 | `entity` | – | Tilbudsjagt-sensor |
 | `title` | sensorens navn | Overskrift |
-| `subtitle` | `Billigste tilbud pr. liter` | Undertekst |
+| `subtitle` | `Billigste literpris` | Undertekst |
 | `kicker` | `Tilbudsjagt` | Lille tekst over titlen |
 | `theme` | `blue` | Farvetema |
-| `image` | dåse-ikon | URL til eget billede |
+| `image` | dåse-ikon | URL til eget billede i stedet for dåsen |
 | `max_rows` | `5` | Antal rækker |
 | `show_header` | `true` | Vis topbanner |
 | `show_updated` | `true` | Vis "Sidst opdateret" |
