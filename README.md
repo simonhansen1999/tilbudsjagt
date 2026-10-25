@@ -66,17 +66,6 @@ max_rows: 5
 
 Tryk på en række for at åbne tilbuddet.
 
-## Udgiv en ny version
-
-Versionen styres kun af git-tagget. `manifest.json` står på `0.0.0` i repoet og skal ikke rettes.
-
-```bash
-git tag v1.1.0
-git push origin v1.1.0
-```
-
-Release-workflowet sætter versionen i `manifest.json` og kortet, pakker `tilbudsjagt.zip` og opretter et GitHub-release. HACS viser derefter opdateringen.
-
 ## Begrænsninger
 
 - Tilbudsugen viser kun de første 30 tilbud pr. vare. Danske butikker ligger først, så de billigste er som regel med.
