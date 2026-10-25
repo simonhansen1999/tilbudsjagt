@@ -9,8 +9,8 @@ const THEMES = {
   orange: { hero: "linear-gradient(120deg,#5d2600 0%,#d35400 60%,#ffb300 140%)", top: "linear-gradient(135deg,#bf4a00 0%,#f57c00 100%)", glow: "rgba(245,124,0,.5)", bar: "#ffe082" },
 };
 
-const UNIT_LABEL = { "ltr.": "liter", "kg.": "kg", "stk.": "stk." };
-const UNIT_SHORT = { "ltr.": "l", "kg.": "kg", "stk.": "stk" };
+const UNIT_LABEL = { ltr: "liter", kg: "kg", stk: "stk." };
+const UNIT_SHORT = { ltr: "l", kg: "kg", stk: "stk" };
 
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -24,8 +24,8 @@ const localToday = () => {
 function packText(o) {
   const n = Number(o.size) || 0;
   let size;
-  if (o.unit === "ltr.") size = n < 1 ? `${Math.round(n * 100)} cl` : `${String(n).replace(".", ",")} l`;
-  else if (o.unit === "kg.") size = n < 1 ? `${Math.round(n * 1000)} g` : `${String(n).replace(".", ",")} kg`;
+  if (o.unit === "ltr") size = n < 1 ? `${Math.round(n * 100)} cl` : `${String(n).replace(".", ",")} l`;
+  else if (o.unit === "kg") size = n < 1 ? `${Math.round(n * 1000)} g` : `${String(n).replace(".", ",")} kg`;
   else size = `${String(n).replace(".", ",")} stk.`;
   return o.units > 1 ? `${o.units} × ${size}` : size;
 }
@@ -123,7 +123,7 @@ class TilbudsjagtCard extends HTMLElement {
     const st = this._hass.states[c.entity];
     const a = st?.attributes || {};
     const offers = (a.offers || []).slice(0, c.max_rows);
-    const unit = a.unit || "ltr.";
+    const unit = a.unit || "ltr";
     const short = UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr";
     const today = localToday();
     const min = offers.length ? Number(offers[0].unit_price) : 0;

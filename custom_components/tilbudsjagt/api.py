@@ -102,7 +102,7 @@ def _parse(item: dict[str, Any]) -> Offer | None:
             name=", ".join(part for part in (brand, product) if part),
             price=float(item.get("price") or 0),
             unit_price=float(item.get("pricePerFullUnitOfQuantityType") or 0),
-            unit=item.get("quantityType") or "",
+            unit=(item.get("quantityType") or "").rstrip("."),
             units=int(item.get("units") or 1),
             size=float(item.get("quantity") or 0),
             start=str(item.get("startDate") or "")[:10],

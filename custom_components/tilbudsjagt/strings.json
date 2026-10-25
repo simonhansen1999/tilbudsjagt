@@ -70,9 +70,9 @@
   "selector": {
     "unit": {
       "options": {
-        "ltr.": "Per litre",
-        "kg.": "Per kg",
-        "stk.": "Per piece",
+        "ltr": "Per litre",
+        "kg": "Per kg",
+        "stk": "Per piece",
         "alle": "All (no unit filter)"
       }
     }

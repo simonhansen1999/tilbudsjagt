@@ -6,7 +6,7 @@ Home Assistant-integration, der finder de billigste tilbud på en vare fra [tilb
 
 **HACS**
 1. HACS → ⋮ → *Brugerdefinerede repositories*
-2. Tilføj `https://github.com/YOUR_GITHUB_USER/tilbudsjagt`, kategori **Integration**
+2. Tilføj `https://github.com/simonhansen1999/tilbudsjagt`, kategori **Integration**
 3. Installér *Tilbudsjagt* og genstart Home Assistant
 
 **Manuelt**

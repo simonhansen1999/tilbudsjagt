@@ -23,12 +23,12 @@ CONF_MAX_RESULTS = "max_results"
 CONF_UPDATE_HOURS = "update_hours"
 
 UNIT_ALL = "alle"
-UNITS = ["ltr.", "kg.", "stk.", UNIT_ALL]
+UNITS = ["ltr", "kg", "stk", UNIT_ALL]
 
 DEFAULTS = {
     CONF_NAME_CONTAINS: "",
     CONF_NAME_EXCLUDES: "",
-    CONF_UNIT: "ltr.",
+    CONF_UNIT: "ltr",
     CONF_MIN_UNITS: 1,
     CONF_EXCLUDE_CHAINS: [],
     CONF_INCLUDE_BORDER: False,

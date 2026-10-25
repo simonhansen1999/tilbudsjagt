@@ -13,7 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import ATTRIBUTION, BASE_URL, DOMAIN
 from .coordinator import TilbudsjagtConfigEntry, TilbudsjagtCoordinator
 
-UNIT_SHORT = {"ltr.": "l", "kg.": "kg", "stk.": "stk"}
+UNIT_SHORT = {"ltr": "l", "kg": "kg", "stk": "stk"}
 
 
 async def async_setup_entry(

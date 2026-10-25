@@ -70,9 +70,9 @@
   "selector": {
     "unit": {
       "options": {
-        "ltr.": "Pr. liter",
-        "kg.": "Pr. kg",
-        "stk.": "Pr. stk.",
+        "ltr": "Pr. liter",
+        "kg": "Pr. kg",
+        "stk": "Pr. stk.",
         "alle": "Alle (intet enhedsfilter)"
       }
     }
