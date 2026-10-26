@@ -28,7 +28,13 @@ const ICON = {
   calendar: "M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V9h14v11Z",
   star: "M12 17.3 18.2 21l-1.6-7 5.4-4.7-7.1-.6L12 2 9.1 8.7 2 9.3 7.4 14l-1.6 7z",
   info: "M11 7h2v2h-2V7Zm0 4h2v6h-2v-6Zm1-9a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z",
+  paper: "M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1Zm-9 14H6v-2h5v2Zm0-4H6v-2h5v2Zm0-4H6V7h5v2Zm7 8h-5V7h5v10Z",
+  search: "M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z",
+  close: "M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z",
+  open: "M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7ZM19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7Z",
 };
+const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[name]}"/></svg>`;
+
 const CAN = `<svg class="can" viewBox="0 0 60 100" aria-hidden="true">
   <defs>
     <linearGradient id="tjBody" x1="0" x2="1"><stop offset="0" stop-color="#05070d"/><stop offset=".45" stop-color="#2a3246"/><stop offset="1" stop-color="#05070d"/></linearGradient>
@@ -41,7 +47,11 @@ const CAN = `<svg class="can" viewBox="0 0 60 100" aria-hidden="true">
   <rect x="13" y="22" width="4" height="68" rx="2" fill="#fff" opacity=".13"/>
 </svg>`;
 
-const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[name]}"/></svg>`;
+const TAG = `<svg class="tag" viewBox="0 0 64 64" aria-hidden="true">
+  <path d="M6 30V10a4 4 0 0 1 4-4h20l28 28-24 24z" fill="rgba(255,255,255,.95)"/>
+  <circle cx="17" cy="17" r="4.5" fill="var(--tj-b)"/>
+  <text x="36" y="42" text-anchor="middle" font-size="16" font-weight="900" fill="var(--tj-a)" font-family="Arial, sans-serif" transform="rotate(45 36 36)">%</text>
+</svg>`;
 
 function sizeText(o) {
   const n = Number(o.size) || 0;
@@ -50,12 +60,11 @@ function sizeText(o) {
   return `${num(n)} stk.`;
 }
 
-function packWords(o) {
-  return PACKAGE[o.package] || ["stk.", "stk."];
-}
+const packWords = (o) => PACKAGE[o.package] || ["stk.", "stk."];
 
 function packText(o) {
   const [one, many] = packWords(o);
+  if (!PACKAGE[o.package]) return o.units > 1 ? `${o.units} × ${sizeText(o)}` : sizeText(o);
   return o.units > 1 ? `${o.units} ${many} à ${sizeText(o)}` : `1 ${one} à ${sizeText(o)}`;
 }
 
@@ -78,7 +87,7 @@ function initials(chain) {
 
 const STYLE = `
   :host { display: block; }
-  ha-card { overflow: hidden; border-radius: 22px; font-family: var(--ha-font-family-body, inherit); }
+  ha-card { overflow: hidden; border-radius: 22px; }
 
   /* Topbanner */
   .hero {
@@ -88,11 +97,48 @@ const STYLE = `
   }
   .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
   .kicker { font-size: 11px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; opacity: .8; }
-  .title { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 4px; letter-spacing: .02em; text-transform: uppercase; }
+  .title { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 4px; letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; }
   .sub { font-size: 12.5px; opacity: .85; margin-top: 3px; }
   .art { width: 64px; display: flex; justify-content: center; }
   .can { width: 50px; height: 84px; transform: rotate(10deg); filter: drop-shadow(0 4px 6px rgba(0,0,0,.55)); }
+  .tag { width: 58px; height: 58px; transform: rotate(-8deg); filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
   .art img { max-width: 70px; max-height: 84px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,.55)); }
+
+  /* Søgning */
+  .search {
+    position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    padding: 0 6px 0 12px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
+  }
+  .search:focus-within { background: rgba(255,255,255,.24); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6); }
+  .search svg { width: 20px; height: 20px; fill: #fff; opacity: .85; flex: none; }
+  .search input {
+    flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; color: #fff;
+    font: inherit; font-size: 15px; font-weight: 600; -webkit-appearance: none; appearance: none;
+  }
+  .search input::-webkit-search-cancel-button { display: none; }
+  .search input::placeholder { color: rgba(255,255,255,.65); font-weight: 500; }
+  .search button { display: none; border: 0; background: none; padding: 6px; cursor: pointer; border-radius: 8px; }
+  .search.has-text button { display: flex; }
+  .search button:hover { background: rgba(255,255,255,.15); }
+  .spinner {
+    display: none; width: 16px; height: 16px; border-radius: 50%; flex: none;
+    border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: spin .8s linear infinite;
+  }
+  .search.busy .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .cats { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 2px; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .cats:empty { display: none; }
+  .cat {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    font: inherit; font-size: 12.5px; font-weight: 600; color: var(--primary-text-color);
+    background: rgba(127,127,127,.12); border: 1px solid transparent;
+  }
+  .cat b { font-weight: 700; font-size: 11px; color: var(--secondary-text-color); }
+  .cat.on { color: #fff; background: var(--tj-a); }
+  .cat.on b { color: rgba(255,255,255,.8); }
 
   /* Liste */
   .list { padding: 10px; display: flex; flex-direction: column; }
@@ -132,7 +178,7 @@ const STYLE = `
 
   .main { min-width: 0; }
   .head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .chain { font-size: 16px; font-weight: 700; color: var(--primary-text-color); letter-spacing: -.005em; }
+  .chain { font-size: 16px; font-weight: 700; color: var(--primary-text-color); }
   .badge {
     display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px 3px 7px; border-radius: 999px;
     font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #fff;
@@ -140,9 +186,11 @@ const STYLE = `
     box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--tj-a) 80%, transparent);
   }
   .badge svg { width: 12px; height: 12px; fill: #ffd76a; }
+  .name { font-size: 13.5px; font-weight: 600; color: var(--primary-text-color); margin-top: 3px; line-height: 1.25; }
   .pack { font-size: 14px; font-weight: 600; color: var(--primary-text-color); margin-top: 4px; }
+  .name + .pack { font-size: 13px; font-weight: 500; color: var(--secondary-text-color); margin-top: 2px; }
   .pack .dot { opacity: .4; margin: 0 4px; }
-  .pack .total { font-weight: 800; }
+  .pack .total { font-weight: 800; color: var(--primary-text-color); }
   .pack .pant { font-weight: 500; color: var(--secondary-text-color); font-size: 12px; }
   .each { font-size: 12px; color: var(--secondary-text-color); margin-top: 2px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -154,6 +202,12 @@ const STYLE = `
   .chip.limit { color: #7a4300; background: linear-gradient(135deg, #ffe9b8, #ffd98a); box-shadow: inset 0 0 0 1px rgba(160,100,0,.18); }
   .chip.soon { color: #0b4f8a; background: #d9ecff; }
   .chip.last { color: #8a1c1c; background: #ffdede; }
+  .chip.paper {
+    cursor: pointer; border: 0; font: inherit; font-size: 11px; font-weight: 700;
+    color: var(--tj-a); background: color-mix(in srgb, var(--tj-a) 14%, transparent);
+  }
+  .chip.paper:hover { background: color-mix(in srgb, var(--tj-a) 22%, transparent); }
+  .chip.paper.on { color: #fff; background: var(--tj-a); }
 
   .price { text-align: right; white-space: nowrap; }
   .unit-price { font-size: 25px; font-weight: 800; line-height: 1; color: var(--primary-text-color); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
@@ -164,7 +218,20 @@ const STYLE = `
   .top .meter i { background: linear-gradient(90deg, var(--tj-a), var(--tj-c)); }
   .diff { font-size: 11.5px; font-weight: 700; color: var(--secondary-text-color); margin-top: 5px; font-variant-numeric: tabular-nums; }
 
-  .empty { padding: 28px; text-align: center; color: var(--secondary-text-color); }
+  .flyer { grid-column: 1 / -1; margin-top: 4px; cursor: default; }
+  .flyer-frame {
+    position: relative; border-radius: 14px; overflow: hidden; background: #fff;
+    box-shadow: 0 6px 20px -8px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+  .flyer img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: #fff; }
+  .flyer a {
+    position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; text-decoration: none;
+    color: #fff; background: rgba(0,0,0,.72); backdrop-filter: blur(6px);
+  }
+  .flyer a svg { width: 14px; height: 14px; fill: currentColor; }
+
+  .empty { padding: 28px 20px; text-align: center; color: var(--secondary-text-color); font-size: 14px; }
   .foot { padding: 2px 22px 14px; font-size: 11px; color: var(--secondary-text-color); opacity: .8; }
 
   @media (max-width: 420px) {
@@ -184,22 +251,26 @@ class TilbudsjagtCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this._open = new Set();
+    this._pending = null;
+    this._timer = null;
   }
 
   setConfig(config) {
     if (!config.entity) throw new Error("Vælg en Tilbudsjagt-sensor (entity)");
     this._config = { theme: "blue", max_rows: 5, show_header: true, show_updated: true, ...config };
+    this._built = null;
     this._sig = null;
-    if (this._hass) this._render();
+    if (this._hass) this._update();
   }
 
   set hass(hass) {
     this._hass = hass;
     const st = hass.states[this._config.entity];
     const sig = st ? `${st.last_updated}|${isoToday()}` : "missing";
-    if (sig === this._sig) return;
+    if (sig === this._sig && this._built) return;
     this._sig = sig;
-    this._render();
+    this._update();
   }
 
   getCardSize() {
@@ -221,20 +292,190 @@ class TilbudsjagtCard extends HTMLElement {
     return { entity: entity || "" };
   }
 
-  _row(o, i, best, short, today) {
+  get _attrs() {
+    return this._hass.states[this._config.entity]?.attributes || {};
+  }
+
+  /* Bygger den faste ramme én gang, så søgefeltet ikke mister fokus */
+  _build(search) {
+    const c = this._config;
+    const theme = THEMES[c.theme] || THEMES.blue;
+    this.shadowRoot.innerHTML = `<style>${STYLE}</style>
+      <ha-card style="--tj-a:${theme.a};--tj-b:${theme.b};--tj-c:${theme.c};--tj-hero:${theme.hero};--tj-surface:var(--ha-card-background, var(--card-background-color, #fff))">
+        ${
+          c.show_header
+            ? `<div class="hero">
+                <div class="hero-grid">
+                  <div>
+                    <div class="kicker">${esc(c.kicker ?? "Tilbudsjagt")}</div>
+                    <div class="title"></div>
+                    <div class="sub"></div>
+                  </div>
+                  <div class="art"></div>
+                </div>
+                ${
+                  search
+                    ? `<label class="search">${svg("search")}
+                        <input type="search" enterkeyhint="search" autocomplete="off" placeholder="Søg vare, fx smør eller kaffe">
+                        <span class="spinner"></span>
+                        <button type="button" title="Ryd">${svg("close")}</button>
+                      </label>`
+                    : ""
+                }
+              </div>`
+            : ""
+        }
+        <div class="cats"></div>
+        <div class="body"></div>
+        <div class="foot"></div>
+      </ha-card>`;
+
+    const root = this.shadowRoot;
+    root.querySelector(".body").addEventListener("click", (ev) => this._onBodyClick(ev));
+    root.querySelector(".cats").addEventListener("click", (ev) => this._onCategory(ev));
+
+    const input = root.querySelector(".search input");
+    if (input) {
+      input.value = this._attrs.query || "";
+      input.addEventListener("input", () => {
+        this._syncSearchState();
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => this._search(input.value), 900);
+      });
+      input.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          clearTimeout(this._timer);
+          this._search(input.value);
+          input.blur();
+        }
+      });
+      root.querySelector(".search button").addEventListener("click", (ev) => {
+        ev.preventDefault();
+        input.value = "";
+        this._search("");
+        input.focus();
+      });
+    }
+    this._built = search ? "search" : "product";
+  }
+
+  _search(value) {
+    const query = value.trim();
+    const entity = this._attrs.query_entity;
+    if (!entity || query === (this._attrs.query || "")) {
+      this._pending = null;
+      this._syncSearchState();
+      return;
+    }
+    this._pending = query;
+    this._open.clear();
+    this._syncSearchState();
+    this._hass.callService("text", "set_value", { entity_id: entity, value: query });
+  }
+
+  _syncSearchState() {
+    const box = this.shadowRoot.querySelector(".search");
+    if (!box) return;
+    box.classList.toggle("has-text", !!box.querySelector("input").value);
+    box.classList.toggle("busy", this._pending !== null);
+  }
+
+  _onCategory(ev) {
+    const btn = ev.target.closest(".cat");
+    const entity = this._attrs.category_entity;
+    if (!btn || !entity) return;
+    this._open.clear();
+    this._hass.callService("select", "select_option", { entity_id: entity, option: btn.dataset.value });
+  }
+
+  _onBodyClick(ev) {
+    const paper = ev.target.closest(".chip.paper");
+    if (paper) {
+      ev.stopPropagation();
+      const id = paper.dataset.id;
+      this._open.has(id) ? this._open.delete(id) : this._open.add(id);
+      this._renderBody();
+      return;
+    }
+    if (ev.target.closest(".flyer")) return;
+    const row = ev.target.closest(".row");
+    if (row) window.open(row.dataset.url, "_blank", "noopener");
+  }
+
+  _update() {
+    const search = this._attrs.mode === "search";
+    if (this._built !== (search ? "search" : "product")) this._build(search);
+
+    const a = this._attrs;
+    if (this._pending !== null && a.query === this._pending) this._pending = null;
+    const input = this.shadowRoot.querySelector(".search input");
+    if (input && this._pending === null && this.shadowRoot.activeElement !== input) input.value = a.query || "";
+    this._syncSearchState();
+
+    this._renderHero(search);
+    this._renderCategories(search);
+    this._renderBody();
+    this._renderFoot();
+  }
+
+  _renderHero(search) {
+    const c = this._config;
+    const a = this._attrs;
+    const root = this.shadowRoot;
+    const title = root.querySelector(".title");
+    if (!title) return;
+    const unit = a.unit || "ltr";
+    const query = search && a.query ? a.query : "";
+    title.textContent = c.title || query || a.friendly_name || "Tilbud";
+    const parts = [c.subtitle ?? (UNIT_TITLE[unit] || "Billigste pris")];
+    if (c.subtitle == null && search && a.category) parts.push(a.category);
+    if (c.subtitle == null && a.include_deposit) parts.push("inkl. pant");
+    root.querySelector(".sub").textContent = parts.join(" · ");
+    const art = c.image ? `<img src="${esc(c.image)}" alt="">` : unit === "ltr" ? CAN : TAG;
+    const holder = root.querySelector(".art");
+    if (holder.dataset.art !== art) {
+      holder.innerHTML = art;
+      holder.dataset.art = art;
+    }
+  }
+
+  _renderCategories(search) {
+    const a = this._attrs;
+    const box = this.shadowRoot.querySelector(".cats");
+    const cats = a.categories || [];
+    if (!search || !a.query || cats.length < 2) {
+      box.innerHTML = "";
+      return;
+    }
+    const active = a.category_choice === "alle" ? "alle" : a.category;
+    const total = cats.reduce((sum, x) => sum + x.count, 0);
+    box.innerHTML =
+      cats
+        .slice(0, 10)
+        .map(
+          (x) =>
+            `<button type="button" class="cat ${x.name === active ? "on" : ""}" data-value="${esc(x.name)}">${esc(x.name)} <b>${x.count}</b></button>`
+        )
+        .join("") +
+      `<button type="button" class="cat ${active === "alle" ? "on" : ""}" data-value="alle">Alle <b>${total}</b></button>`;
+  }
+
+  _row(o, i, ctx) {
     const top = i === 0;
     const [one] = packWords(o);
-    const each = o.units > 1 ? `${kr(o.price / o.units)} kr pr. ${one}${o.deposit_included ? " inkl. pant" : ""}` : "";
+    const each = o.units > 1 && PACKAGE[o.package] ? `${kr(o.price / o.units)} kr pr. ${one}${o.deposit_included ? " inkl. pant" : ""}` : "";
     const pant = o.deposit && !o.deposit_included ? `<span class="pant"> + pant</span>` : "";
-    const diff = Number(o.unit_price) - best;
-    const pct = Math.max(10, Math.min(100, Math.round((best / Number(o.unit_price)) * 100)));
+    const diff = Number(o.unit_price) - ctx.best;
+    const pct = Math.max(10, Math.min(100, Math.round((ctx.best / Number(o.unit_price)) * 100)));
+    const open = this._open.has(String(o.id));
 
     const chips = [`<span class="chip">${svg("calendar")}${esc(dateRange(o.start, o.end))}</span>`];
-    if (o.start > today) chips.push(`<span class="chip soon">Starter snart</span>`);
-    else if (o.end === today) chips.push(`<span class="chip last">Sidste dag</span>`);
-    if (o.deposit_included) chips.push(`<span class="chip">Inkl. ${kr(o.deposit)} kr pant</span>`);
+    if (o.start > ctx.today) chips.push(`<span class="chip soon">Starter snart</span>`);
+    else if (o.end === ctx.today) chips.push(`<span class="chip last">Sidste dag</span>`);
     if (o.limit) chips.push(`<span class="chip limit">${svg("cart")}Maks. ${esc(o.limit)} pr. kunde</span>`);
+    if (o.deposit_included) chips.push(`<span class="chip">Inkl. ${kr(o.deposit)} kr pant</span>`);
     for (const note of o.notes || []) chips.push(`<span class="chip">${svg("info")}${esc(note)}</span>`);
+    if (o.image) chips.push(`<button type="button" class="chip paper ${open ? "on" : ""}" data-id="${esc(o.id)}">${svg("paper")}${open ? "Skjul avis" : "Se i avisen"}</button>`);
 
     return `<div class="row ${top ? "top" : ""}" data-url="${esc(o.url)}">
       <div class="logo">
@@ -247,58 +488,68 @@ class TilbudsjagtCard extends HTMLElement {
           <span class="chain">${esc(o.chain)}</span>
           ${top ? `<span class="badge">${svg("star")}Bedste pris</span>` : ""}
         </div>
+        ${ctx.showNames ? `<div class="name">${esc(o.name)}</div>` : ""}
         <div class="pack">${esc(packText(o))}<span class="dot">•</span><span class="total">${kr(o.price)} kr</span>${pant}</div>
         ${each ? `<div class="each">${esc(each)}</div>` : ""}
         <div class="chips">${chips.join("")}</div>
       </div>
       <div class="price">
-        <div class="unit-price">${kr(o.unit_price)}<small>${short}</small></div>
+        <div class="unit-price">${kr(o.unit_price)}<small>${ctx.short}</small></div>
         <div class="meter"><i style="width:${pct}%"></i></div>
-        ${top ? "" : `<div class="diff">${diff > 0.004 ? `+${kr(diff)} ${short}` : "Samme pris"}</div>`}
+        ${top ? "" : `<div class="diff">${diff > 0.004 ? `+${kr(diff)} ${ctx.short}` : "Samme pris"}</div>`}
       </div>
+      ${
+        open
+          ? `<div class="flyer"><div class="flyer-frame">
+              <img src="${esc(o.image)}" referrerpolicy="no-referrer" alt="Udsnit af tilbudsavisen">
+              <a href="${esc(o.url)}" target="_blank" rel="noopener">${svg("open")}Åbn tilbuddet</a>
+            </div></div>`
+          : ""
+      }
     </div>`;
   }
 
-  _render() {
+  _renderBody() {
     const c = this._config;
-    const theme = THEMES[c.theme] || THEMES.blue;
+    const a = this._attrs;
     const st = this._hass.states[c.entity];
-    const a = st?.attributes || {};
+    const body = this.shadowRoot.querySelector(".body");
     const offers = (a.offers || []).slice(0, c.max_rows);
-    const unit = a.unit || "ltr";
-    const short = UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr";
-    const today = isoToday();
-    const best = offers.length ? Number(offers[0].unit_price) : 0;
 
-    const sub = c.subtitle ?? `${UNIT_TITLE[unit] || "Billigste pris"}${a.include_deposit ? " · inkl. pant" : ""}`;
-    const header = c.show_header
-      ? `<div class="hero"><div class="hero-grid">
-          <div>
-            <div class="kicker">${esc(c.kicker ?? "Tilbudsjagt")}</div>
-            <div class="title">${esc(c.title || a.friendly_name || "Tilbud")}</div>
-            <div class="sub">${esc(sub)}</div>
-          </div>
-          <div class="art">${c.image ? `<img src="${esc(c.image)}" alt="">` : CAN}</div>
-        </div></div>`
-      : "";
-
-    const body = offers.length
-      ? `<div class="list">${offers.map((o, i) => this._row(o, i, best, short, today)).join("")}</div>`
-      : `<div class="empty">${st ? "Ingen tilbud lige nu" : `Entiteten ${esc(c.entity)} findes ikke`}</div>`;
-
-    let foot = "";
-    if (c.show_updated && a.last_fetch) {
-      const d = new Date(a.last_fetch);
-      foot = `<div class="foot">Opdateret ${d.toLocaleDateString("da-DK")} kl. ${d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}</div>`;
+    if (!st) {
+      body.innerHTML = `<div class="empty">Entiteten ${esc(c.entity)} findes ikke</div>`;
+      return;
+    }
+    if (a.mode === "search" && !a.query) {
+      body.innerHTML = `<div class="empty">Skriv en vare i søgefeltet</div>`;
+      return;
+    }
+    if (!offers.length) {
+      body.innerHTML = `<div class="empty">${a.mode === "search" ? `Ingen tilbud på “${esc(a.query)}” lige nu` : "Ingen tilbud lige nu"}</div>`;
+      return;
     }
 
-    this.shadowRoot.innerHTML = `<style>${STYLE}</style>
-      <ha-card style="--tj-a:${theme.a};--tj-b:${theme.b};--tj-c:${theme.c};--tj-hero:${theme.hero};--tj-surface:var(--ha-card-background, var(--card-background-color, #fff))">${header}${body}${foot}</ha-card>`;
+    const unit = a.unit || "ltr";
+    const ctx = {
+      best: Number(offers[0].unit_price),
+      short: UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr",
+      today: isoToday(),
+      showNames: new Set(offers.map((o) => o.name)).size > 1,
+    };
+    body.innerHTML = `<div class="list">${offers.map((o, i) => this._row(o, i, ctx)).join("")}</div>`;
+    body.querySelectorAll(".logo img").forEach((img) => img.addEventListener("error", () => img.remove()));
+  }
 
-    this.shadowRoot.querySelectorAll(".logo img").forEach((img) => img.addEventListener("error", () => img.remove()));
-    this.shadowRoot.querySelectorAll(".row").forEach((row) =>
-      row.addEventListener("click", () => window.open(row.dataset.url, "_blank", "noopener"))
-    );
+  _renderFoot() {
+    const foot = this.shadowRoot.querySelector(".foot");
+    const a = this._attrs;
+    if (!this._config.show_updated || !a.last_fetch) {
+      foot.textContent = "";
+      return;
+    }
+    const d = new Date(a.last_fetch);
+    const count = a.total_offers ? `${a.total_offers} tilbud fundet · ` : "";
+    foot.textContent = `${count}Opdateret ${d.toLocaleDateString("da-DK")} kl. ${d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}`;
   }
 }
 
@@ -322,7 +573,7 @@ const EDITOR_SCHEMA = [
     },
   },
   { name: "image", selector: { text: { type: "url" } } },
-  { name: "max_rows", selector: { number: { min: 1, max: 20, mode: "box" } } },
+  { name: "max_rows", selector: { number: { min: 1, max: 50, mode: "box" } } },
   { name: "show_header", selector: { boolean: {} } },
   { name: "show_updated", selector: { boolean: {} } },
 ];
@@ -332,9 +583,9 @@ const EDITOR_LABELS = {
   title: "Titel",
   subtitle: "Undertitel",
   theme: "Farvetema",
-  image: "Billede-URL (valgfri, erstatter dåsen)",
+  image: "Billede-URL (valgfri, erstatter ikonet)",
   max_rows: "Antal rækker",
-  show_header: "Vis topbanner",
+  show_header: "Vis topbanner (og søgefelt)",
   show_updated: "Vis 'opdateret'",
 };
 
@@ -374,7 +625,7 @@ if (!window.customCards.some((c) => c.type === "tilbudsjagt-card")) {
   window.customCards.push({
     type: "tilbudsjagt-card",
     name: "Tilbudsjagt",
-    description: "Billigste tilbud fra tilbudsugen.dk",
+    description: "Billigste tilbud fra tilbudsugen.dk – også med søgefelt",
     preview: true,
   });
 }

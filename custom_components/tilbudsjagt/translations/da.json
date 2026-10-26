@@ -2,6 +2,13 @@
   "config": {
     "step": {
       "user": {
+        "title": "Hvad vil du tilføje?",
+        "menu_options": {
+          "product": "En fast vare (fx Pepsi Max)",
+          "search": "Et søgefelt til dashboardet"
+        }
+      },
+      "product": {
         "title": "Tilføj vare",
         "description": "Søg efter en vare på tilbudsugen.dk.",
         "data": {
@@ -13,15 +20,24 @@
           "name": "Vises på enheden og kortet. Standard er varen."
         }
       },
+      "search": {
+        "title": "Tilføj søgning",
+        "description": "Opretter et søgefelt, du kan bruge fra kortet på dashboardet.",
+        "data": {
+          "name": "Navn"
+        }
+      },
       "filters": {
         "title": "Filtre",
-        "description": "Fandt tilbud fra {chains} kæder. Vælg hvad du vil se.",
+        "description": "Vælg hvad du vil se.",
         "data": {
           "name_contains": "Navnet skal indeholde",
           "name_excludes": "Navnet må ikke indeholde",
+          "category": "Kategori",
           "unit": "Enhed",
           "package": "Emballage",
           "min_units": "Mindste antal pr. tilbud",
+          "include_chains": "Kun disse kæder",
           "exclude_chains": "Udeluk kæder",
           "include_border": "Medtag grænsehandel",
           "include_deposit": "Medregn pant",
@@ -32,7 +48,10 @@
         "data_description": {
           "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
           "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
+          "category": "Automatisk vælger den kategori, de fleste træffere hører til, så fx baguetter med smør sorteres fra, når du søger på smør.",
+          "unit": "Automatisk vælger den mest brugte enhed (pr. liter, kg eller stk.).",
           "min_units": "Fx 24 for kun kasser/rammer.",
+          "include_chains": "Tom betyder alle kæder.",
           "exclude_chains": "Vælg fra listen eller skriv en del af navnet.",
           "include_deposit": "Lægger pant oven i pris og literpris. Materialet gættes ud fra størrelsen."
         }
@@ -43,7 +62,7 @@
       "no_offers": "Ingen tilbud fundet på varen."
     },
     "abort": {
-      "already_configured": "Varen er allerede tilføjet."
+      "already_configured": "Er allerede tilføjet."
     }
   },
   "options": {
@@ -53,9 +72,11 @@
         "data": {
           "name_contains": "Navnet skal indeholde",
           "name_excludes": "Navnet må ikke indeholde",
+          "category": "Kategori",
           "unit": "Enhed",
           "package": "Emballage",
           "min_units": "Mindste antal pr. tilbud",
+          "include_chains": "Kun disse kæder",
           "exclude_chains": "Udeluk kæder",
           "include_border": "Medtag grænsehandel",
           "include_deposit": "Medregn pant",
@@ -66,7 +87,10 @@
         "data_description": {
           "name_contains": "Kommasepareret, alle ord skal matche. Fx 'pepsi, max'.",
           "name_excludes": "Kommasepareret. Fx 'sodastream, koncentrat, lime'.",
+          "category": "Automatisk vælger den kategori, de fleste træffere hører til, så fx baguetter med smør sorteres fra, når du søger på smør.",
+          "unit": "Automatisk vælger den mest brugte enhed (pr. liter, kg eller stk.).",
           "min_units": "Fx 24 for kun kasser/rammer.",
+          "include_chains": "Tom betyder alle kæder.",
           "exclude_chains": "Vælg fra listen eller skriv en del af navnet.",
           "include_deposit": "Lægger pant oven i pris og literpris. Materialet gættes ud fra størrelsen."
         }
@@ -76,6 +100,7 @@
   "selector": {
     "unit": {
       "options": {
+        "auto": "Automatisk",
         "ltr": "Pr. liter",
         "kg": "Pr. kg",
         "stk": "Pr. stk.",
@@ -88,12 +113,32 @@
         "ds": "Dåser",
         "fl": "Flasker"
       }
+    },
+    "category": {
+      "options": {
+        "auto": "Automatisk",
+        "alle": "Alle kategorier"
+      }
     }
   },
   "entity": {
     "sensor": {
       "cheapest_store": {
         "name": "Billigste butik"
+      }
+    },
+    "text": {
+      "query": {
+        "name": "Søg"
+      }
+    },
+    "select": {
+      "category": {
+        "name": "Kategori",
+        "state": {
+          "auto": "Automatisk",
+          "alle": "Alle kategorier"
+        }
       }
     }
   }

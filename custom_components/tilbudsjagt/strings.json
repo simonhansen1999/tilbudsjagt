@@ -2,6 +2,13 @@
   "config": {
     "step": {
       "user": {
+        "title": "What do you want to add?",
+        "menu_options": {
+          "product": "A fixed product (e.g. Pepsi Max)",
+          "search": "A search box for the dashboard"
+        }
+      },
+      "product": {
         "title": "Add product",
         "description": "Search for a product on tilbudsugen.dk.",
         "data": {
@@ -13,15 +20,24 @@
           "name": "Shown on the device and card. Defaults to the product."
         }
       },
+      "search": {
+        "title": "Add search",
+        "description": "Creates a search field you can use from the dashboard card.",
+        "data": {
+          "name": "Name"
+        }
+      },
       "filters": {
         "title": "Filters",
-        "description": "Found offers from {chains} chains. Choose what to show.",
+        "description": "Choose what to show.",
         "data": {
           "name_contains": "Name must contain",
           "name_excludes": "Name must not contain",
+          "category": "Category",
           "unit": "Unit",
           "package": "Packaging",
           "min_units": "Minimum units per offer",
+          "include_chains": "Only these chains",
           "exclude_chains": "Exclude chains",
           "include_border": "Include border shops",
           "include_deposit": "Include deposit (pant)",
@@ -32,7 +48,10 @@
         "data_description": {
           "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
           "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
+          "category": "Automatic picks the category most matches belong to, so e.g. baguettes with butter are left out when searching for butter.",
+          "unit": "Automatic picks the most common unit (per litre, kg or piece).",
           "min_units": "E.g. 24 for crates only.",
+          "include_chains": "Leave empty for all chains.",
           "exclude_chains": "Pick from the list or type part of a name.",
           "include_deposit": "Adds Danish bottle/can deposit to price and price per litre. Material is estimated from size."
         }
@@ -43,7 +62,7 @@
       "no_offers": "No offers found for this product."
     },
     "abort": {
-      "already_configured": "This product is already added."
+      "already_configured": "Already added."
     }
   },
   "options": {
@@ -53,9 +72,11 @@
         "data": {
           "name_contains": "Name must contain",
           "name_excludes": "Name must not contain",
+          "category": "Category",
           "unit": "Unit",
           "package": "Packaging",
           "min_units": "Minimum units per offer",
+          "include_chains": "Only these chains",
           "exclude_chains": "Exclude chains",
           "include_border": "Include border shops",
           "include_deposit": "Include deposit (pant)",
@@ -66,7 +87,10 @@
         "data_description": {
           "name_contains": "Comma separated, all words must match. E.g. 'pepsi, max'.",
           "name_excludes": "Comma separated. E.g. 'sodastream, koncentrat, lime'.",
+          "category": "Automatic picks the category most matches belong to, so e.g. baguettes with butter are left out when searching for butter.",
+          "unit": "Automatic picks the most common unit (per litre, kg or piece).",
           "min_units": "E.g. 24 for crates only.",
+          "include_chains": "Leave empty for all chains.",
           "exclude_chains": "Pick from the list or type part of a name.",
           "include_deposit": "Adds Danish bottle/can deposit to price and price per litre. Material is estimated from size."
         }
@@ -76,6 +100,7 @@
   "selector": {
     "unit": {
       "options": {
+        "auto": "Automatic",
         "ltr": "Per litre",
         "kg": "Per kg",
         "stk": "Per piece",
@@ -88,12 +113,32 @@
         "ds": "Cans",
         "fl": "Bottles"
       }
+    },
+    "category": {
+      "options": {
+        "auto": "Automatic",
+        "alle": "All categories"
+      }
     }
   },
   "entity": {
     "sensor": {
       "cheapest_store": {
         "name": "Cheapest store"
+      }
+    },
+    "text": {
+      "query": {
+        "name": "Search"
+      }
+    },
+    "select": {
+      "category": {
+        "name": "Category",
+        "state": {
+          "auto": "Automatic",
+          "alle": "All categories"
+        }
       }
     }
   }

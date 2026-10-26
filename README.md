@@ -1,88 +1,160 @@
 # Tilbudsjagt
 
-Home Assistant-integration, der finder de billigste tilbud på en vare fra [tilbudsugen.dk](https://www.tilbudsugen.dk) – fx Pepsi Max, Coca-Cola eller kaffe. Inkluderer et færdigt dashboard-kort.
+Find de billigste tilbud i danske supermarkeder direkte i Home Assistant. Data hentes fra [tilbudsugen.dk](https://www.tilbudsugen.dk).
+
+- Følg faste varer som Pepsi Max, kaffe eller smør
+- Søg efter alt fra dit dashboard
+- Se billigste butik, pris pr. liter/kg, pris pr. dåse, maks. pr. kunde og udsnit fra tilbudsavisen
+- Færdigt dashboard-kort følger med
 
 ## Installation
 
-**HACS**
-1. HACS → ⋮ → *Brugerdefinerede repositories*
-2. Tilføj `https://github.com/simonhansen1999/tilbudsjagt`, kategori **Integration**
-3. Installér *Tilbudsjagt* og genstart Home Assistant
+**Via HACS**
+1. Åbn HACS → ⋮ → **Brugerdefinerede repositories**
+2. Tilføj `https://github.com/simonhansen1999/tilbudsjagt` med kategorien **Integration**
+3. Søg efter **Tilbudsjagt**, installér og genstart Home Assistant
 
 **Manuelt**
-- Kopiér `custom_components/tilbudsjagt` til `config/custom_components/` og genstart
+1. Hent `tilbudsjagt.zip` fra seneste [release](https://github.com/simonhansen1999/tilbudsjagt/releases)
+2. Pak den ud i `config/custom_components/tilbudsjagt/`
+3. Genstart Home Assistant
 
-## Opsætning
+## Kom i gang
 
-Indstillinger → Enheder & tjenester → Tilføj integration → **Tilbudsjagt**
+Gå til **Indstillinger → Enheder & tjenester → Tilføj integration → Tilbudsjagt** og vælg:
 
-1. **Vare**: fx `pepsi max` eller en hel `tilbudsugen.dk/offer/…`-adresse
-2. **Filtre**:
-   - **Navnet skal indeholde**: fx `pepsi, max`
-   - **Navnet må ikke indeholde**: fx `sodastream, koncentrat, lime`
-   - **Enhed**: pr. liter, kg, stk. eller alle
-   - **Emballage**: alle, dåser eller flasker
-   - **Mindste antal pr. tilbud**: fx `24` for kun kasser/rammer
-   - **Udeluk kæder**: vælg fra listen
-   - **Medtag grænsehandel**
-   - **Medregn pant**: lægger pant oven i pris og literpris (dåser og glas under 1 l: 1 kr, plast under 1 l: 1,50 kr, 1 l og derover: 3 kr). Materialet står ikke i dataene, så flasker til og med 33 cl regnes som glas
-   - **Kun billigste tilbud pr. kæde**
-   - **Antal tilbud** og **opdateringsinterval** (standard 12 timer)
+- **En fast vare**: skriv fx `pepsi max`, `kaffe` eller indsæt en `tilbudsugen.dk/offer/…`-adresse
+- **Et søgefelt til dashboardet**: søg efter hvad som helst direkte fra kortet
 
-Tilføj flere varer ved at køre opsætningen igen. Filtrene kan ændres senere under **Konfigurér**.
+Du kan tilføje så mange varer, du vil, ved at gentage trinnet.
 
-## Sensorer
+## Filtre
 
-To sensorer pr. vare, fx for Pepsi Max:
+Vælges under opsætningen og kan altid ændres under **Konfigurér** på integrationen.
 
-- `sensor.pepsi_max`
-  - **Tilstand**: billigste enhedspris (kr/l, kr/kg eller kr/stk)
-  - **Attributter**: `offers` (de viste tilbud med `chain`, `name`, `price`, `unit_price`, `units`, `package`, `size`, `start`, `end`, `limit`, `notes`, `deposit`, `deposit_included`, `url`, `logo`), `chains`, `total_offers`, `unit`, `include_deposit`, `url`, `last_fetch`
-- `sensor.pepsi_max_billigste_butik`
-  - **Tilstand**: kæden med den laveste enhedspris, fx `Meny`
-  - **Attributter**: `unit_price`, `price`, `product`, `url`, `price_unit` og `prices` med billigste enhedspris for **alle** kæder, der opfylder filtrene
+| Filter | Beskrivelse |
+|---|---|
+| Navnet skal indeholde | Ord adskilt af komma, fx `pepsi, max`. Alle ord skal stå i varens navn. Kun for faste varer |
+| Navnet må ikke indeholde | Ord adskilt af komma, fx `lime, lemon, sodastream` |
+| Kategori | **Automatisk** vælger den kategori, de fleste træffere hører til. Søger du på smør, kommer kun kategorien *Smør* med, og fx baguetter med smør sorteres fra |
+| Enhed | Automatisk, pr. liter, pr. kg, pr. stk. eller alle |
+| Emballage | Alle, dåser eller flasker |
+| Mindste antal pr. tilbud | Fx `24` for kun at se kasser/rammer |
+| Kun disse kæder | De butikker du handler i. Tom betyder alle |
+| Udeluk kæder | Butikker du aldrig vil se |
+| Medtag grænsehandel | Viser også tilbud fra grænsebutikker |
+| Medregn pant | Lægger pant oven i prisen (se nedenfor) |
+| Kun billigste tilbud pr. kæde | Én række pr. butik |
+| Antal tilbud | Hvor mange tilbud der vises |
+| Opdateringsinterval | Hvor ofte der hentes nye tilbud (standard 12 timer) |
 
-Eksempel i en skabelon:
+**Pant** beregnes efter de danske satser: dåser og glasflasker under 1 l koster 1 kr, plastflasker under 1 l 1,50 kr, og flasker på 1 l eller mere 3 kr. Tilbudsugen oplyser ikke materialet, så flasker til og med 33 cl regnes som glas.
 
-```jinja
-{{ states('sensor.pepsi_max_billigste_butik') }} –
-{{ state_attr('sensor.pepsi_max_billigste_butik', 'unit_price') }} kr/l
-```
+## Dashboard-kort
 
-## Kort
+Kortet følger med integrationen. Genindlæs browseren én gang efter installationen.
 
-Kortet følger med integrationen – ingen ekstra installation eller ressource. Genindlæs browseren efter første opsætning.
-
-Dashboard → Rediger → Tilføj kort → **Tilbudsjagt**, eller:
+Gå til **Rediger dashboard → Tilføj kort → Tilbudsjagt**, og vælg en sensor. Eller indsæt:
 
 ```yaml
 type: custom:tilbudsjagt-card
 entity: sensor.pepsi_max
-title: Pepsi Max
-theme: blue        # blue, red, green, purple, orange
+theme: blue
 max_rows: 5
 ```
+
+Vælger du sensoren fra et søgefelt, får kortet automatisk et søgefelt og knapper til at skifte kategori.
+
+**På kortet**
+- Billigste tilbud er fremhævet med **Bedste pris**
+- Pakke, samlet pris og pris pr. dåse/flaske
+- Prisforskel til det billigste tilbud
+- Mærkater for gyldighed, maks. pr. kunde, begrænset parti m.m.
+- **Se i avisen** viser udsnittet fra tilbudsavisen
+- Tryk på et tilbud for at åbne det på tilbudsugen.dk
+
+**Indstillinger**
 
 | Valg | Standard | Beskrivelse |
 |---|---|---|
 | `entity` | – | Tilbudsjagt-sensor |
-| `title` | sensorens navn | Overskrift |
-| `subtitle` | `Billigste literpris` | Undertekst |
-| `kicker` | `Tilbudsjagt` | Lille tekst over titlen |
-| `theme` | `blue` | Farvetema |
-| `image` | dåse-ikon | URL til eget billede i stedet for dåsen |
+| `title` | varens navn / søgeordet | Overskrift |
+| `subtitle` | fx `Billigste literpris` | Undertekst |
+| `theme` | `blue` | `blue`, `red`, `green`, `purple` eller `orange` |
+| `image` | dåse eller prismærke | URL til eget billede |
 | `max_rows` | `5` | Antal rækker |
-| `show_header` | `true` | Vis topbanner |
-| `show_updated` | `true` | Vis "Sidst opdateret" |
+| `show_header` | `true` | Vis topbanner og søgefelt |
+| `show_updated` | `true` | Vis hvornår der sidst er hentet |
 
-Tryk på en række for at åbne tilbuddet.
+## Entiteter
 
-## Begrænsninger
+**For hver fast vare**, fx Pepsi Max:
 
-- Tilbudsugen viser kun de første 30 tilbud pr. vare. Danske butikker ligger først, så de billigste er som regel med.
-- Integrationen læser sidens indlejrede data. Ændrer tilbudsugen.dk deres side, kan den holde op med at virke.
-- Hent ikke oftere end nødvendigt.
+| Entitet | Tilstand |
+|---|---|
+| `sensor.pepsi_max` | Laveste pris pr. liter/kg/stk. Alle viste tilbud ligger i attributten `offers` |
+| `sensor.pepsi_max_billigste_butik` | Butikken med laveste pris. Attributten `prices` har prisen hos alle butikker |
+
+**For et søgefelt**, fx "Tilbudssøgning":
+
+| Entitet | Tilstand |
+|---|---|
+| `text.tilbudssogning_sog` | Det der søges efter |
+| `select.tilbudssogning_kategori` | Automatisk, alle eller en bestemt kategori |
+| `sensor.tilbudssogning` | Som for en fast vare |
+| `sensor.tilbudssogning_billigste_butik` | Som for en fast vare |
+
+Hvert tilbud i `offers` indeholder bl.a. `chain`, `name`, `category`, `price`, `unit_price`, `units`, `package`, `size`, `start`, `end`, `limit`, `notes`, `deposit`, `image` og `url`.
+
+## Eksempler
+
+**Byg dit eget kort**
+
+```yaml
+type: markdown
+content: >
+  {% for o in state_attr('sensor.pepsi_max', 'offers') %}
+  **{{ o.chain }}**: {{ '%.2f' | format(o.unit_price) }} kr/l
+  {% if o.limit %}(maks. {{ o.limit }} pr. kunde){% endif %}
+  {% endfor %}
+```
+
+**Søg fra en automation eller et script**
+
+```yaml
+action: text.set_value
+target:
+  entity_id: text.tilbudssogning_sog
+data:
+  value: kaffe
+```
+
+**Besked når Pepsi Max er billig**
+
+```yaml
+triggers:
+  - trigger: numeric_state
+    entity_id: sensor.pepsi_max
+    below: 7
+actions:
+  - action: notify.notify
+    data:
+      message: >
+        Pepsi Max koster {{ states('sensor.pepsi_max') }} kr/l
+        hos {{ states('sensor.pepsi_max_billigste_butik') }}
+```
+
+## Godt at vide
+
+- Tilbuddene læses fra tilbudsugen.dk's hjemmeside. Ændrer de siden, kan integrationen holde op med at virke, indtil den er opdateret.
+- Der hentes op til 120 tilbud pr. vare.
+- Butikslogoer og avisudsnit hentes direkte fra tilbudsugen.dk af din browser.
+- Hent ikke oftere end nødvendigt. To gange i døgnet er rigeligt.
+
+## Problemer og ønsker
+
+Opret et [issue](https://github.com/simonhansen1999/tilbudsjagt/issues).
 
 ## Ansvarsfraskrivelse
 
-Ikke lavet af eller godkendt af Tilbudsugen.dk eller butikkerne. Navne og logoer tilhører deres ejere. Logoer hentes direkte fra tilbudsugen.dk af browseren.
+Tilbudsjagt er ikke lavet af eller godkendt af Tilbudsugen.dk eller butikkerne. Navne og logoer tilhører deres ejere. Priser og gyldighed kan afvige fra butikkens egen avis, som altid er gældende.
