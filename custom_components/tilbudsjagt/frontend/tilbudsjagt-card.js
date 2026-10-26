@@ -225,12 +225,13 @@ const STYLE = `
     font-size: 11px; font-weight: 600; color: var(--secondary-text-color); background: rgba(127,127,127,.11);
   }
   .chip.label {
-    --g: #22c55e;
+    --g: #0ea5e9;
     color: color-mix(in srgb, var(--g) 72%, var(--primary-text-color));
     background: color-mix(in srgb, var(--g) 13%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g) 35%, transparent);
   }
   .chip.label svg { opacity: 1; }
+  .chip.label.organic { --g: #22c55e; }
   .chip svg { width: 12px; height: 12px; fill: currentColor; opacity: .8; }
   .chip.limit { color: #7a4300; background: linear-gradient(135deg, #ffe9b8, #ffd98a); box-shadow: inset 0 0 0 1px rgba(160,100,0,.18); }
   .chip.soon { color: #0b4f8a; background: #d9ecff; }
@@ -617,7 +618,7 @@ class TilbudsjagtCard extends HTMLElement {
     if (o.start > ctx.today) chips.push(`<span class="chip soon">Starter snart</span>`);
     else if (o.end === ctx.today) chips.push(`<span class="chip last">Sidste dag</span>`);
     if (o.limit) chips.push(`<span class="chip limit">${svg("cart")}Maks. ${esc(o.limit)} pr. kunde</span>`);
-    for (const l of o.labels || []) if (ctx.labels.has(l)) chips.push(`<span class="chip label">${svg(/økolog/i.test(l) ? "leaf" : "check")}${esc(l)}</span>`);
+    for (const l of o.labels || []) if (ctx.labels.has(l)) chips.push(/økolog/i.test(l) ? `<span class="chip label organic">${svg("leaf")}${esc(l)}</span>` : `<span class="chip label">${svg("check")}${esc(l)}</span>`);
     if (o.deposit_included) chips.push(`<span class="chip">Inkl. ${kr(o.deposit)} kr pant</span>`);
     for (const note of o.notes || []) chips.push(`<span class="chip">${svg("info")}${esc(note)}</span>`);
     if (o.image) chips.push(`<button type="button" class="chip paper ${open ? "on" : ""}" data-id="${esc(o.id)}">${svg("paper")}${open ? "Skjul avis" : "Se i avisen"}</button>`);
