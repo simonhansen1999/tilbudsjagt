@@ -1,4 +1,4 @@
-"""Sensor med billigste tilbud."""
+"""Sensorer for Tilbudsjagt."""
 
 from __future__ import annotations
 
@@ -27,13 +27,12 @@ async def async_setup_entry(
     )
 
 
-def _unit_text(coordinator: TilbudsjagtCoordinator) -> str:
-    unit = coordinator.options["unit"]
+def unit_text(unit: str) -> str:
     return f"kr/{UNIT_SHORT[unit]}" if unit in UNIT_SHORT else "kr"
 
 
 class TilbudsjagtEntity(CoordinatorEntity[TilbudsjagtCoordinator]):
-    """Fælles enhed for sensorerne."""
+    """Fælles enhed for alle entiteter på en vare eller søgning."""
 
     _attr_has_entity_name = True
     _attr_attribution = ATTRIBUTION
@@ -45,7 +44,7 @@ class TilbudsjagtEntity(CoordinatorEntity[TilbudsjagtCoordinator]):
             name=entry.title,
             manufacturer="Tilbudsugen.dk",
             entry_type=DeviceEntryType.SERVICE,
-            configuration_url=f"{BASE_URL}/offer/{coordinator.slug}",
+            configuration_url=f"{BASE_URL}/offer/{coordinator.slug}" if coordinator.slug else BASE_URL,
         )
 
 
@@ -53,15 +52,20 @@ class TilbudsjagtSensor(TilbudsjagtEntity, SensorEntity):
     """Billigste enhedspris. Alle viste tilbud ligger i attributten 'offers'."""
 
     _attr_name = None
-    _attr_icon = "mdi:tag-heart"
-    _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_suggested_display_precision = 2
-    _unrecorded_attributes = frozenset({"offers", "chains"})
+    _unrecorded_attributes = frozenset({"offers", "chains", "categories"})
 
     def __init__(self, coordinator: TilbudsjagtCoordinator, entry: TilbudsjagtConfigEntry) -> None:
         super().__init__(coordinator, entry)
         self._attr_unique_id = entry.entry_id
-        self._attr_native_unit_of_measurement = _unit_text(coordinator)
+        self._attr_icon = "mdi:magnify" if coordinator.is_search else "mdi:tag-heart"
+        # Kun en fast enhed giver mening i statistik
+        if coordinator.options["unit"] in UNIT_SHORT:
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def native_unit_of_measurement(self) -> str:
+        return unit_text(self.coordinator.data.unit)
 
     @property
     def native_value(self) -> float | None:
@@ -70,16 +74,28 @@ class TilbudsjagtSensor(TilbudsjagtEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        data = self.coordinator.data
-        return {
+        coordinator = self.coordinator
+        data = coordinator.data
+        attrs: dict[str, Any] = {
             "offers": [o.as_dict() for o in data.offers],
             "chains": data.chains,
+            "categories": [{"name": n, "count": c} for n, c in data.categories],
+            "category": data.category,
             "total_offers": data.total,
-            "unit": self.coordinator.options["unit"],
-            "include_deposit": self.coordinator.options["include_deposit"],
-            "url": f"{BASE_URL}/offer/{self.coordinator.slug}",
-            "last_fetch": data.fetched.isoformat(),
+            "unit": data.unit,
+            "include_deposit": coordinator.options["include_deposit"],
+            "mode": coordinator.mode,
+            "url": f"{BASE_URL}/offer/{coordinator.slug}" if coordinator.slug else BASE_URL,
+            "last_fetch": data.fetched.isoformat() if data.fetched else None,
         }
+        if coordinator.is_search:
+            attrs.update(
+                query=data.query,
+                category_choice=coordinator.category_choice,
+                query_entity=coordinator.query_entity_id,
+                category_entity=coordinator.category_entity_id,
+            )
+        return attrs
 
 
 class CheapestStoreSensor(TilbudsjagtEntity, SensorEntity):
@@ -107,6 +123,6 @@ class CheapestStoreSensor(TilbudsjagtEntity, SensorEntity):
             "price": best.price if best else None,
             "product": best.name if best else None,
             "url": best.url if best else None,
-            "price_unit": _unit_text(self.coordinator),
+            "price_unit": unit_text(self.coordinator.data.unit),
             "prices": {o.chain: o.unit_price for o in per_chain},
         }
