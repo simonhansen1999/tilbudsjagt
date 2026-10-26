@@ -31,6 +31,7 @@ const ICON = {
   paper: "M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1Zm-9 14H6v-2h5v2Zm0-4H6v-2h5v2Zm0-4H6V7h5v2Zm7 8h-5V7h5v10Z",
   search: "M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z",
   close: "M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z",
+  leaf: "M17 8C8 10 5.9 16.2 3.8 21.3l1.9.7 1-2.3c.5.2 1 .3 1.3.3C19 20 22 3 22 3c-1 2-8 2.2-13 3.2S2 11.5 2 13.5 3.8 17.3 3.8 17.3C7 8 17 8 17 8Z",
   check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z",
   open: "M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7ZM19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7Z",
 };
@@ -223,7 +224,13 @@ const STYLE = `
     display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
     font-size: 11px; font-weight: 600; color: var(--secondary-text-color); background: rgba(127,127,127,.11);
   }
-  .chip.label { color: #1b6b3a; background: #d7f5e3; }
+  .chip.label {
+    --g: #22c55e;
+    color: color-mix(in srgb, var(--g) 72%, var(--primary-text-color));
+    background: color-mix(in srgb, var(--g) 13%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g) 35%, transparent);
+  }
+  .chip.label svg { opacity: 1; }
   .chip svg { width: 12px; height: 12px; fill: currentColor; opacity: .8; }
   .chip.limit { color: #7a4300; background: linear-gradient(135deg, #ffe9b8, #ffd98a); box-shadow: inset 0 0 0 1px rgba(160,100,0,.18); }
   .chip.soon { color: #0b4f8a; background: #d9ecff; }
@@ -401,6 +408,7 @@ class TilbudsjagtCard extends HTMLElement {
     }
     this._pending = query;
     this._open.clear();
+    this._resetLabels();
     this._syncSearchState();
     this._hass.callService("text", "set_value", { entity_id: entity, value: query });
   }
@@ -434,6 +442,12 @@ class TilbudsjagtCard extends HTMLElement {
     } catch (e) {
       /* ingen lagring tilgængelig */
     }
+  }
+
+  _resetLabels() {
+    if (!this._labels.size) return;
+    this._labels.clear();
+    this._save();
   }
 
   _onTools(ev) {
@@ -532,6 +546,10 @@ class TilbudsjagtCard extends HTMLElement {
     if (this._built !== (search ? "search" : "product")) this._build(search);
 
     const a = this._attrs;
+    if (search) {
+      if (this._lastQuery !== undefined && a.query !== this._lastQuery) this._resetLabels();
+      this._lastQuery = a.query;
+    }
     if (this._pending !== null && a.query === this._pending) this._pending = null;
     const input = this.shadowRoot.querySelector(".search input");
     if (input && this._pending === null && this.shadowRoot.activeElement !== input) input.value = a.query || "";
@@ -599,7 +617,7 @@ class TilbudsjagtCard extends HTMLElement {
     if (o.start > ctx.today) chips.push(`<span class="chip soon">Starter snart</span>`);
     else if (o.end === ctx.today) chips.push(`<span class="chip last">Sidste dag</span>`);
     if (o.limit) chips.push(`<span class="chip limit">${svg("cart")}Maks. ${esc(o.limit)} pr. kunde</span>`);
-    for (const l of o.labels || []) if (ctx.labels.has(l)) chips.push(`<span class="chip label">${svg("check")}${esc(l)}</span>`);
+    for (const l of o.labels || []) if (ctx.labels.has(l)) chips.push(`<span class="chip label">${svg(/økolog/i.test(l) ? "leaf" : "check")}${esc(l)}</span>`);
     if (o.deposit_included) chips.push(`<span class="chip">Inkl. ${kr(o.deposit)} kr pant</span>`);
     for (const note of o.notes || []) chips.push(`<span class="chip">${svg("info")}${esc(note)}</span>`);
     if (o.image) chips.push(`<button type="button" class="chip paper ${open ? "on" : ""}" data-id="${esc(o.id)}">${svg("paper")}${open ? "Skjul avis" : "Se i avisen"}</button>`);
