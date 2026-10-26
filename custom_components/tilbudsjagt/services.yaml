@@ -1,0 +1,59 @@
+watch:
+  fields:
+    query:
+      example: kaffe
+      selector:
+        text:
+    entity_id:
+      selector:
+        entity:
+          integration: tilbudsjagt
+          domain: sensor
+    name:
+      selector:
+        text:
+    price:
+      required: true
+      selector:
+        number:
+          min: 0.01
+          max: 1000
+          step: 0.01
+          mode: box
+          unit_of_measurement: kr
+    notify:
+      required: true
+      example: mobile_app_min_telefon
+      selector:
+        text:
+          multiple: true
+
+update_watch:
+  fields:
+    watch_id:
+      required: true
+      selector:
+        text:
+    price:
+      selector:
+        number:
+          min: 0.01
+          max: 1000
+          step: 0.01
+          mode: box
+          unit_of_measurement: kr
+    notify:
+      selector:
+        text:
+          multiple: true
+
+unwatch:
+  fields:
+    watch_id:
+      selector:
+        text:
+    entity_id:
+      selector:
+        entity:
+          integration: tilbudsjagt
+          domain: sensor

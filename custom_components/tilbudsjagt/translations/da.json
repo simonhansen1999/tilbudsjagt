@@ -5,7 +5,8 @@
         "title": "Hvad vil du tilføje?",
         "menu_options": {
           "product": "En fast vare (fx Pepsi Max)",
-          "search": "Et søgefelt til dashboardet"
+          "search": "Et søgefelt til dashboardet",
+          "watchlist": "Prisovervågning (få besked når en vare bliver billig)"
         }
       },
       "product": {
@@ -93,8 +94,38 @@
           "include_chains": "Tom betyder alle kæder.",
           "exclude_chains": "Vælg fra listen eller skriv en del af navnet.",
           "include_deposit": "Lægger pant oven i pris og literpris. Materialet gættes ud fra størrelsen."
+        },
+        "menu_options": {
+          "add": "Tilføj overvågning",
+          "remove": "Fjern overvågning"
+        }
+      },
+      "add": {
+        "title": "Tilføj overvågning",
+        "description": "Du får besked, når varen koster prisen eller mindre.",
+        "data": {
+          "search": "Vare",
+          "name": "Navn (valgfrit)",
+          "price": "Giv besked når prisen er højst",
+          "notify": "Send besked til"
+        },
+        "data_description": {
+          "search": "Fx 'pepsi max', 'smør' eller 'kaffe'.",
+          "price": "Pris pr. liter, kg eller stk."
+        }
+      },
+      "remove": {
+        "title": "Fjern overvågning",
+        "data": {
+          "watches": "Overvågninger der skal fjernes"
         }
       }
+    },
+    "error": {
+      "no_devices": "Vælg mindst én enhed."
+    },
+    "abort": {
+      "no_watches": "Der er ingen overvågninger at fjerne."
     }
   },
   "selector": {
@@ -138,6 +169,71 @@
         "state": {
           "auto": "Automatisk",
           "alle": "Alle kategorier"
+        }
+      }
+    },
+    "binary_sensor": {
+      "price_alarm": {
+        "name": "Prisalarm"
+      }
+    }
+  },
+  "services": {
+    "watch": {
+      "name": "Overvåg pris",
+      "description": "Giv besked når en vare koster prisen eller mindre. Angiv enten en vare eller en Tilbudsjagt-sensor; en sensor bruger de samme filtre som dens kort.",
+      "fields": {
+        "query": {
+          "name": "Vare",
+          "description": "Fx pepsi max."
+        },
+        "entity_id": {
+          "name": "Sensor",
+          "description": "En Tilbudsjagt-vare eller -søgning."
+        },
+        "name": {
+          "name": "Navn",
+          "description": "Vises i beskeden."
+        },
+        "price": {
+          "name": "Pris",
+          "description": "Højeste pris pr. liter, kg eller stk."
+        },
+        "notify": {
+          "name": "Enheder",
+          "description": "Notify-tjenester, fx mobile_app_min_telefon."
+        }
+      }
+    },
+    "update_watch": {
+      "name": "Ret overvågning",
+      "description": "Ret pris eller enheder på en overvågning.",
+      "fields": {
+        "watch_id": {
+          "name": "Overvågning",
+          "description": "Id'et fra prisovervågningens sensor."
+        },
+        "price": {
+          "name": "Pris",
+          "description": "Ny højeste pris."
+        },
+        "notify": {
+          "name": "Enheder",
+          "description": "Ny liste over enheder."
+        }
+      }
+    },
+    "unwatch": {
+      "name": "Stop overvågning",
+      "description": "Fjerner en prisovervågning.",
+      "fields": {
+        "watch_id": {
+          "name": "Overvågning",
+          "description": "Id'et fra prisovervågningens sensor."
+        },
+        "entity_id": {
+          "name": "Sensor",
+          "description": "Fjerner overvågningen af denne vare eller søgning."
         }
       }
     }

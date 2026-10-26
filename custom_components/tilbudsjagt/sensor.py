@@ -10,8 +10,9 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import ATTRIBUTION, BASE_URL, DOMAIN
+from .const import ATTRIBUTION, BASE_URL, DOMAIN, MODE_WATCHLIST
 from .coordinator import TilbudsjagtConfigEntry, TilbudsjagtCoordinator
+from .watchlist import WatchlistCoordinator
 
 UNIT_SHORT = {"ltr": "l", "kg": "kg", "stk": "stk"}
 
@@ -22,6 +23,9 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     coordinator = entry.runtime_data
+    if coordinator.mode == MODE_WATCHLIST:
+        async_add_entities([WatchlistSensor(coordinator, entry)])
+        return
     async_add_entities(
         [TilbudsjagtSensor(coordinator, entry), CheapestStoreSensor(coordinator, entry)]
     )
@@ -85,6 +89,7 @@ class TilbudsjagtSensor(TilbudsjagtEntity, SensorEntity):
             "unit": data.unit,
             "include_deposit": coordinator.options["include_deposit"],
             "one_per_chain": coordinator.options["one_per_chain"],
+            "slug": coordinator.current_slug,
             "mode": coordinator.mode,
             "url": f"{BASE_URL}/offer/{coordinator.slug}" if coordinator.slug else BASE_URL,
             "last_fetch": data.fetched.isoformat() if data.fetched else None,
@@ -126,4 +131,47 @@ class CheapestStoreSensor(TilbudsjagtEntity, SensorEntity):
             "url": best.url if best else None,
             "price_unit": unit_text(self.coordinator.data.unit),
             "prices": {o.chain: o.unit_price for o in per_chain},
+        }
+
+
+class WatchlistEntity(CoordinatorEntity[WatchlistCoordinator]):
+    """Fælles enhed for overvågningslisten."""
+
+    _attr_has_entity_name = True
+    _attr_attribution = ATTRIBUTION
+
+    def __init__(self, coordinator: WatchlistCoordinator, entry: TilbudsjagtConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=entry.title,
+            manufacturer="Tilbudsugen.dk",
+            entry_type=DeviceEntryType.SERVICE,
+        )
+
+
+class WatchlistSensor(WatchlistEntity, SensorEntity):
+    """Antal overvågninger. Alle ligger i attributten 'watches'."""
+
+    _attr_name = None
+    _attr_icon = "mdi:bell-badge"
+    _attr_native_unit_of_measurement = "overvågninger"
+    _unrecorded_attributes = frozenset({"watches"})
+
+    def __init__(self, coordinator: WatchlistCoordinator, entry: TilbudsjagtConfigEntry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_watchlist"
+
+    @property
+    def native_value(self) -> int:
+        return len(self.coordinator.watches)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        states = self.coordinator.data or []
+        return {
+            "mode": MODE_WATCHLIST,
+            "watches": [s.as_dict() for s in states],
+            "hits": sum(1 for s in states if s.hits),
+            "last_fetch": self.coordinator.fetched.isoformat() if self.coordinator.fetched else None,
         }

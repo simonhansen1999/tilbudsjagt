@@ -5,7 +5,8 @@
         "title": "What do you want to add?",
         "menu_options": {
           "product": "A fixed product (e.g. Pepsi Max)",
-          "search": "A search box for the dashboard"
+          "search": "A search box for the dashboard",
+          "watchlist": "Price monitoring (notify me when a product gets cheap)"
         }
       },
       "product": {
@@ -93,8 +94,38 @@
           "include_chains": "Leave empty for all chains.",
           "exclude_chains": "Pick from the list or type part of a name.",
           "include_deposit": "Adds Danish bottle/can deposit to price and price per litre. Material is estimated from size."
+        },
+        "menu_options": {
+          "add": "Add monitoring",
+          "remove": "Remove monitoring"
+        }
+      },
+      "add": {
+        "title": "Add monitoring",
+        "description": "You get a notification when the product costs the price or less.",
+        "data": {
+          "search": "Product",
+          "name": "Name (optional)",
+          "price": "Notify when price is at most",
+          "notify": "Send notification to"
+        },
+        "data_description": {
+          "search": "E.g. 'pepsi max', 'butter' or 'coffee'.",
+          "price": "Price per litre, kg or piece."
+        }
+      },
+      "remove": {
+        "title": "Remove monitoring",
+        "data": {
+          "watches": "Monitoring to remove"
         }
       }
+    },
+    "error": {
+      "no_devices": "Choose at least one device."
+    },
+    "abort": {
+      "no_watches": "There is no monitoring to remove."
     }
   },
   "selector": {
@@ -138,6 +169,71 @@
         "state": {
           "auto": "Automatic",
           "alle": "All categories"
+        }
+      }
+    },
+    "binary_sensor": {
+      "price_alarm": {
+        "name": "Price alert"
+      }
+    }
+  },
+  "services": {
+    "watch": {
+      "name": "Watch price",
+      "description": "Notify when a product costs the price or less. Give either a product name or a Tilbudsjagt sensor; a sensor uses the same filters as its card.",
+      "fields": {
+        "query": {
+          "name": "Product",
+          "description": "E.g. pepsi max."
+        },
+        "entity_id": {
+          "name": "Sensor",
+          "description": "A Tilbudsjagt product or search sensor."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Shown in the notification."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Highest price per litre, kg or piece."
+        },
+        "notify": {
+          "name": "Devices",
+          "description": "Notify services, e.g. mobile_app_my_phone."
+        }
+      }
+    },
+    "update_watch": {
+      "name": "Change monitoring",
+      "description": "Change price or devices on a monitoring.",
+      "fields": {
+        "watch_id": {
+          "name": "Monitoring",
+          "description": "The id from the price monitoring sensor."
+        },
+        "price": {
+          "name": "Price",
+          "description": "New highest price."
+        },
+        "notify": {
+          "name": "Devices",
+          "description": "New list of devices."
+        }
+      }
+    },
+    "unwatch": {
+      "name": "Stop monitoring",
+      "description": "Removes a price monitoring.",
+      "fields": {
+        "watch_id": {
+          "name": "Monitoring",
+          "description": "The id from the price monitoring sensor."
+        },
+        "entity_id": {
+          "name": "Sensor",
+          "description": "Removes the monitoring of this product or search."
         }
       }
     }
