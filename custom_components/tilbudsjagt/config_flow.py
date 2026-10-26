@@ -94,17 +94,19 @@ def _filter_schema(
             vol.Required(CONF_INCLUDE_BORDER, default=opts[CONF_INCLUDE_BORDER]): BooleanSelector(),
             vol.Required(CONF_INCLUDE_DEPOSIT, default=opts[CONF_INCLUDE_DEPOSIT]): BooleanSelector(),
             vol.Required(CONF_ONE_PER_CHAIN, default=opts[CONF_ONE_PER_CHAIN]): BooleanSelector(),
-            vol.Required(CONF_MAX_RESULTS, default=opts[CONF_MAX_RESULTS]): _number(1, 50),
             vol.Required(CONF_UPDATE_HOURS, default=opts[CONF_UPDATE_HOURS]): _number(1, 24),
         }
     )
+    if mode == MODE_PRODUCT:
+        fields[vol.Required(CONF_MAX_RESULTS, default=opts[CONF_MAX_RESULTS])] = _number(1, 50)
     return vol.Schema(fields)
 
 
 def _clean(user_input: dict[str, Any]) -> dict[str, Any]:
     """NumberSelector giver floats; gem hele tal."""
     for key in (CONF_MIN_UNITS, CONF_MAX_RESULTS, CONF_UPDATE_HOURS):
-        user_input[key] = int(user_input[key])
+        if key in user_input:
+            user_input[key] = int(user_input[key])
     return user_input
 
 

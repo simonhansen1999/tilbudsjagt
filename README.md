@@ -45,7 +45,7 @@ Vælges under opsætningen og kan altid ændres under **Konfigurér** på integr
 | Medtag grænsehandel | Viser også tilbud fra grænsebutikker |
 | Medregn pant | Lægger pant oven i prisen (se nedenfor) |
 | Kun billigste tilbud pr. kæde | Én række pr. butik |
-| Antal tilbud | Hvor mange tilbud der vises |
+| Antal tilbud | Hvor mange tilbud der vises (kun faste varer – ved søgning vælges antallet på kortet) |
 | Opdateringsinterval | Hvor ofte der hentes nye tilbud (standard 12 timer) |
 
 **Pant** beregnes efter de danske satser: dåser og glasflasker under 1 l koster 1 kr, plastflasker under 1 l 1,50 kr, og flasker på 1 l eller mere 3 kr. Tilbudsugen oplyser ikke materialet, så flasker til og med 33 cl regnes som glas.
@@ -64,6 +64,12 @@ max_rows: 5
 ```
 
 Vælger du sensoren fra et søgefelt, får kortet automatisk et søgefelt og knapper til at skifte kategori.
+
+Over listen kan du:
+- **Krydse mærker af**, fx *Økologisk*, *Dansk* eller *Glutenfri*, så kun tilbud med de mærker vises. Der vises kun mærker, som skiller tilbuddene ad
+- **Vælge antal**: 5, 10, 20 eller alle
+
+Valgene huskes i din browser.
 
 **På kortet**
 - Billigste tilbud er fremhævet med **Bedste pris**

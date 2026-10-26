@@ -32,6 +32,7 @@ from .const import (
     DOMAIN,
     MODE_PRODUCT,
     MODE_SEARCH,
+    SEARCH_MAX_OFFERS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -113,8 +114,14 @@ class TilbudsjagtCoordinator(DataUpdateCoordinator[TilbudsjagtData]):
             )
         else:
             selection = select_offers(page.offers, self.options, today)
+        # Søgning: kortet filtrerer selv på mærker og antal, så send alle træffere
+        offers = (
+            selection.matched[:SEARCH_MAX_OFFERS]
+            if self.is_search
+            else top_offers(selection.matched, self.options)
+        )
         return TilbudsjagtData(
-            offers=top_offers(selection.matched, self.options),
+            offers=offers,
             per_chain=cheapest_per_chain(selection.matched),
             chains=page.chains,
             categories=selection.categories,

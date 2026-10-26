@@ -84,6 +84,7 @@ class TilbudsjagtSensor(TilbudsjagtEntity, SensorEntity):
             "total_offers": data.total,
             "unit": data.unit,
             "include_deposit": coordinator.options["include_deposit"],
+            "one_per_chain": coordinator.options["one_per_chain"],
             "mode": coordinator.mode,
             "url": f"{BASE_URL}/offer/{coordinator.slug}" if coordinator.slug else BASE_URL,
             "last_fetch": data.fetched.isoformat() if data.fetched else None,
