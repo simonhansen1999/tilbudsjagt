@@ -9,6 +9,7 @@ USER_AGENT = (
 )
 ATTRIBUTION = "Data fra Tilbudsugen.dk"
 MAX_PAGES = 4
+SEARCH_MAX_OFFERS = 50
 
 CONF_MODE = "mode"
 CONF_SEARCH = "search"

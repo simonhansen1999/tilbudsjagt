@@ -31,6 +31,7 @@ const ICON = {
   paper: "M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1Zm-9 14H6v-2h5v2Zm0-4H6v-2h5v2Zm0-4H6V7h5v2Zm7 8h-5V7h5v10Z",
   search: "M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z",
   close: "M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z",
+  check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z",
   open: "M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7ZM19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7Z",
 };
 const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[name]}"/></svg>`;
@@ -129,6 +130,30 @@ const STYLE = `
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .cats { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 2px; scrollbar-width: none; }
+  .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px 0; }
+  .tools:empty { display: none; }
+  .labels { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .lbl {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 7px; border-radius: 10px; cursor: pointer;
+    font: inherit; font-size: 12.5px; font-weight: 600; color: var(--primary-text-color);
+    background: rgba(127,127,127,.1); border: 1px solid rgba(127,127,127,.22);
+  }
+  .lbl .box {
+    width: 15px; height: 15px; border-radius: 4px; box-sizing: border-box; flex: none;
+    border: 1.5px solid var(--secondary-text-color); display: flex; align-items: center; justify-content: center;
+  }
+  .lbl .box svg { width: 13px; height: 13px; fill: #fff; display: none; }
+  .lbl b { font-size: 11px; font-weight: 700; color: var(--secondary-text-color); }
+  .lbl.on { border-color: var(--tj-a); background: color-mix(in srgb, var(--tj-a) 12%, transparent); }
+  .lbl.on .box { background: var(--tj-a); border-color: var(--tj-a); }
+  .lbl.on .box svg { display: block; }
+  .count { display: inline-flex; margin-left: auto; padding: 3px; border-radius: 10px; background: rgba(127,127,127,.12); }
+  .count button {
+    border: 0; background: none; cursor: pointer; padding: 4px 10px; border-radius: 7px;
+    font: inherit; font-size: 12px; font-weight: 700; color: var(--secondary-text-color);
+  }
+  .count button.on { color: var(--primary-text-color); background: var(--tj-surface); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .count span { align-self: center; padding: 0 6px 0 8px; font-size: 11px; font-weight: 600; color: var(--secondary-text-color); }
   .cats::-webkit-scrollbar { display: none; }
   .cats:empty { display: none; }
   .cat {
@@ -193,11 +218,12 @@ const STYLE = `
   .pack .total { font-weight: 800; color: var(--primary-text-color); }
   .pack .pant { font-weight: 500; color: var(--secondary-text-color); font-size: 12px; }
   .each { font-size: 12px; color: var(--secondary-text-color); margin-top: 2px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chips { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 5px; margin-top: -4px; }
   .chip {
-    display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; white-space: nowrap;
     font-size: 11px; font-weight: 600; color: var(--secondary-text-color); background: rgba(127,127,127,.11);
   }
+  .chip.label { color: #1b6b3a; background: #d7f5e3; }
   .chip svg { width: 12px; height: 12px; fill: currentColor; opacity: .8; }
   .chip.limit { color: #7a4300; background: linear-gradient(135deg, #ffe9b8, #ffd98a); box-shadow: inset 0 0 0 1px rgba(160,100,0,.18); }
   .chip.soon { color: #0b4f8a; background: #d9ecff; }
@@ -240,6 +266,7 @@ const STYLE = `
     .can { width: 44px; height: 74px; }
     .art { width: 54px; }
     .row { grid-template-columns: 44px 1fr auto; gap: 11px; padding: 12px 10px; }
+    .chips { grid-column: 1 / -1; margin-top: 0; }
     .row + .row::before { left: 65px; }
     .logo { width: 44px; height: 44px; border-radius: 13px; }
     .unit-price { font-size: 21px; }
@@ -254,6 +281,8 @@ class TilbudsjagtCard extends HTMLElement {
     this._open = new Set();
     this._pending = null;
     this._timer = null;
+    this._labels = new Set();
+    this._count = null;
   }
 
   setConfig(config) {
@@ -261,6 +290,7 @@ class TilbudsjagtCard extends HTMLElement {
     this._config = { theme: "blue", max_rows: 5, show_header: true, show_updated: true, ...config };
     this._built = null;
     this._sig = null;
+    this._restore();
     if (this._hass) this._update();
   }
 
@@ -326,6 +356,7 @@ class TilbudsjagtCard extends HTMLElement {
             : ""
         }
         <div class="cats"></div>
+        <div class="tools"></div>
         <div class="body"></div>
         <div class="foot"></div>
       </ha-card>`;
@@ -333,6 +364,7 @@ class TilbudsjagtCard extends HTMLElement {
     const root = this.shadowRoot;
     root.querySelector(".body").addEventListener("click", (ev) => this._onBodyClick(ev));
     root.querySelector(".cats").addEventListener("click", (ev) => this._onCategory(ev));
+    root.querySelector(".tools").addEventListener("click", (ev) => this._onTools(ev));
 
     const input = root.querySelector(".search input");
     if (input) {
@@ -380,6 +412,99 @@ class TilbudsjagtCard extends HTMLElement {
     box.classList.toggle("busy", this._pending !== null);
   }
 
+  get _key() {
+    return `tilbudsjagt:${this._config.entity}`;
+  }
+
+  _restore() {
+    this._labels = new Set();
+    this._count = null;
+    try {
+      const saved = JSON.parse(localStorage.getItem(this._key) || "{}");
+      this._labels = new Set(saved.labels || []);
+      this._count = saved.count ?? null;
+    } catch (e) {
+      /* ingen lagring tilgængelig */
+    }
+  }
+
+  _save() {
+    try {
+      localStorage.setItem(this._key, JSON.stringify({ labels: [...this._labels], count: this._count }));
+    } catch (e) {
+      /* ingen lagring tilgængelig */
+    }
+  }
+
+  _onTools(ev) {
+    const lbl = ev.target.closest(".lbl");
+    const cnt = ev.target.closest(".count button");
+    if (lbl) {
+      const name = lbl.dataset.label;
+      this._labels.has(name) ? this._labels.delete(name) : this._labels.add(name);
+    } else if (cnt) {
+      this._count = cnt.dataset.count === "all" ? "all" : Number(cnt.dataset.count);
+    } else return;
+    this._open.clear();
+    this._save();
+    this._renderTools();
+    this._renderBody();
+  }
+
+  /* Tilbud efter mærker og evt. én pr. kæde, før antallet skæres til */
+  _filtered() {
+    const a = this._attrs;
+    let list = a.offers || [];
+    if (this._labels.size) list = list.filter((o) => [...this._labels].every((l) => (o.labels || []).includes(l)));
+    if (a.one_per_chain) {
+      const seen = new Set();
+      list = list.filter((o) => !seen.has(o.chain) && seen.add(o.chain));
+    }
+    return list;
+  }
+
+  /* Mærker der skiller tilbuddene ad (ikke dem alle tilbud har) */
+  _labelCounts() {
+    const offers = this._attrs.offers || [];
+    const counts = new Map();
+    for (const o of offers) for (const l of o.labels || []) counts.set(l, (counts.get(l) || 0) + 1);
+    for (const l of this._labels) if (!counts.has(l)) counts.set(l, 0);
+    return [...counts]
+      .filter(([l, n]) => n < offers.length || this._labels.has(l))
+      .sort((x, y) => y[1] - x[1])
+      .slice(0, 8);
+  }
+
+  get _limit() {
+    return this._count === "all" ? Infinity : this._count || this._config.max_rows;
+  }
+
+  _renderTools() {
+    const box = this.shadowRoot.querySelector(".tools");
+    const a = this._attrs;
+    if (a.mode === "search" && !a.query) {
+      box.innerHTML = "";
+      return;
+    }
+    const labels = this._labelCounts();
+    const total = this._filtered().length;
+    const steps = [5, 10, 20].filter((n) => n < total);
+    const current = this._count === "all" ? "all" : String(this._count || this._config.max_rows);
+    const counter =
+      total > 5
+        ? `<div class="count"><span>Vis</span>${steps
+            .map((n) => `<button type="button" class="${current === String(n) ? "on" : ""}" data-count="${n}">${n}</button>`)
+            .join("")}<button type="button" class="${current === "all" ? "on" : ""}" data-count="all">Alle ${total}</button></div>`
+        : "";
+    const chips = labels
+      .map(
+        ([l, n]) =>
+          `<button type="button" class="lbl ${this._labels.has(l) ? "on" : ""}" data-label="${esc(l)}"><span class="box">${svg("check")}</span>${esc(l)} <b>${n}</b></button>`
+      )
+      .join("");
+    box.innerHTML = chips || counter ? `<div class="labels">${chips}</div>${counter}` : "";
+  }
+
   _onCategory(ev) {
     const btn = ev.target.closest(".cat");
     const entity = this._attrs.category_entity;
@@ -414,6 +539,7 @@ class TilbudsjagtCard extends HTMLElement {
 
     this._renderHero(search);
     this._renderCategories(search);
+    this._renderTools();
     this._renderBody();
     this._renderFoot();
   }
@@ -473,6 +599,7 @@ class TilbudsjagtCard extends HTMLElement {
     if (o.start > ctx.today) chips.push(`<span class="chip soon">Starter snart</span>`);
     else if (o.end === ctx.today) chips.push(`<span class="chip last">Sidste dag</span>`);
     if (o.limit) chips.push(`<span class="chip limit">${svg("cart")}Maks. ${esc(o.limit)} pr. kunde</span>`);
+    for (const l of o.labels || []) if (ctx.labels.has(l)) chips.push(`<span class="chip label">${svg("check")}${esc(l)}</span>`);
     if (o.deposit_included) chips.push(`<span class="chip">Inkl. ${kr(o.deposit)} kr pant</span>`);
     for (const note of o.notes || []) chips.push(`<span class="chip">${svg("info")}${esc(note)}</span>`);
     if (o.image) chips.push(`<button type="button" class="chip paper ${open ? "on" : ""}" data-id="${esc(o.id)}">${svg("paper")}${open ? "Skjul avis" : "Se i avisen"}</button>`);
@@ -491,13 +618,13 @@ class TilbudsjagtCard extends HTMLElement {
         ${ctx.showNames ? `<div class="name">${esc(o.name)}</div>` : ""}
         <div class="pack">${esc(packText(o))}<span class="dot">•</span><span class="total">${kr(o.price)} kr</span>${pant}</div>
         ${each ? `<div class="each">${esc(each)}</div>` : ""}
-        <div class="chips">${chips.join("")}</div>
       </div>
       <div class="price">
         <div class="unit-price">${kr(o.unit_price)}<small>${ctx.short}</small></div>
         <div class="meter"><i style="width:${pct}%"></i></div>
         ${top ? "" : `<div class="diff">${diff > 0.004 ? `+${kr(diff)} ${ctx.short}` : "Samme pris"}</div>`}
       </div>
+      <div class="chips">${chips.join("")}</div>
       ${
         open
           ? `<div class="flyer"><div class="flyer-frame">
@@ -514,7 +641,8 @@ class TilbudsjagtCard extends HTMLElement {
     const a = this._attrs;
     const st = this._hass.states[c.entity];
     const body = this.shadowRoot.querySelector(".body");
-    const offers = (a.offers || []).slice(0, c.max_rows);
+    const all = this._filtered();
+    const offers = all.slice(0, this._limit);
 
     if (!st) {
       body.innerHTML = `<div class="empty">Entiteten ${esc(c.entity)} findes ikke</div>`;
@@ -525,7 +653,8 @@ class TilbudsjagtCard extends HTMLElement {
       return;
     }
     if (!offers.length) {
-      body.innerHTML = `<div class="empty">${a.mode === "search" ? `Ingen tilbud på “${esc(a.query)}” lige nu` : "Ingen tilbud lige nu"}</div>`;
+      const why = this._labels.size ? `med ${[...this._labels].map(esc).join(" og ")}` : a.mode === "search" ? `på “${esc(a.query)}”` : "";
+      body.innerHTML = `<div class="empty">Ingen tilbud ${why} lige nu</div>`;
       return;
     }
 
@@ -535,6 +664,7 @@ class TilbudsjagtCard extends HTMLElement {
       short: UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr",
       today: isoToday(),
       showNames: new Set(offers.map((o) => o.name)).size > 1,
+      labels: new Set(this._labelCounts().map(([l]) => l)),
     };
     body.innerHTML = `<div class="list">${offers.map((o, i) => this._row(o, i, ctx)).join("")}</div>`;
     body.querySelectorAll(".logo img").forEach((img) => img.addEventListener("error", () => img.remove()));

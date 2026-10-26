@@ -41,6 +41,7 @@ class Offer:
     image: str = ""
     limit: int | None = None
     notes: tuple[str, ...] = ()
+    labels: tuple[str, ...] = ()
     deposit: float = 0.0
     deposit_included: bool = False
 
@@ -186,6 +187,9 @@ def _parse(item: dict[str, Any]) -> Offer | None:
             image=item.get("imageUrl") or "",
             limit=limit,
             notes=notes,
+            labels=tuple(
+                n["name"] for n in item.get("specificNote") or [] if isinstance(n, dict) and n.get("name")
+            ),
             deposit=_deposit(item),
         )
     except (KeyError, TypeError, ValueError):
