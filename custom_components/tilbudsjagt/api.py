@@ -16,6 +16,12 @@ _NEXT_DATA_RE = re.compile(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', re
 _LIMIT_RE = re.compile(r"\bma(?:ks|x)\.?\s*(\d+)", re.IGNORECASE)
 _NOTE_NAMES = {"fl. var.": "Flere varianter"}
 
+# Tilbudsugen sætter af og til "Økologisk" på varer, der ikke er det.
+# Mærket fjernes, hvis samme vare hos en anden butik står uden mærket,
+# medmindre navnet selv siger det. Se _check_organic.
+_ORGANIC = "økologisk"
+_ORGANIC_WORDS = ("øko", "organic")
+
 
 class TilbudsugenError(Exception):
     """Siden kunne ikke hentes eller læses."""
@@ -154,6 +160,7 @@ def parse_listing(data: dict[str, Any], items: list[dict[str, Any]]) -> OfferPag
             seen.add(offer.id)
             offers.append(offer)
 
+    offers = _check_organic(offers)
     filter_chains = ((data.get("optionsForFilters") or {}).get("chains")) or []
     chains = {c.get("text") for c in filter_chains if c.get("text")} | {o.chain for o in offers if o.chain}
     listing = data.get("pageOfOrganicProductOffers") or {}
@@ -187,9 +194,7 @@ def _parse(item: dict[str, Any]) -> Offer | None:
             image=item.get("imageUrl") or "",
             limit=limit,
             notes=notes,
-            labels=tuple(
-                n["name"] for n in item.get("specificNote") or [] if isinstance(n, dict) and n.get("name")
-            ),
+            labels=_labels(item.get("specificNote") or []),
             deposit=_deposit(item),
         )
     except (KeyError, TypeError, ValueError):
@@ -240,6 +245,33 @@ def _parse_notes(described: list[dict[str, Any]]) -> tuple[int | None, tuple[str
         else:
             notes.append(_NOTE_NAMES.get(value.lower(), value))
     return limit, tuple(notes)
+
+
+def _labels(notes: list[dict[str, Any]]) -> tuple[str, ...]:
+    """Varens mærker, fx Økologisk eller Laktosefri."""
+    return tuple(n["name"] for n in notes if isinstance(n, dict) and n.get("name"))
+
+
+def _product_key(offer: Offer) -> str:
+    """Mærke og produkt uden tal og procenter, fx 'arla skummetmælk'."""
+    return " ".join(re.sub(r"[\d.,%]+", " ", offer.name.lower()).split())
+
+
+def _check_organic(offers: list[Offer]) -> list[Offer]:
+    """Fjern 'Økologisk', når samme vare et andet sted står uden mærket."""
+    without = {
+        _product_key(o)
+        for o in offers
+        if not any(label.lower() == _ORGANIC for label in o.labels)
+    }
+    result = []
+    for o in offers:
+        organic = any(label.lower() == _ORGANIC for label in o.labels)
+        named = any(w in o.name.lower() for w in _ORGANIC_WORDS)
+        if organic and not named and _product_key(o) in without:
+            o = replace(o, labels=tuple(lbl for lbl in o.labels if lbl.lower() != _ORGANIC))
+        result.append(o)
+    return result
 
 
 def words(text: str, sep: str = ",") -> list[str]:

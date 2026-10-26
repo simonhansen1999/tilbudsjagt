@@ -401,6 +401,7 @@ class TilbudsjagtCard extends HTMLElement {
     }
     this._pending = query;
     this._open.clear();
+    this._resetLabels();
     this._syncSearchState();
     this._hass.callService("text", "set_value", { entity_id: entity, value: query });
   }
@@ -434,6 +435,12 @@ class TilbudsjagtCard extends HTMLElement {
     } catch (e) {
       /* ingen lagring tilgængelig */
     }
+  }
+
+  _resetLabels() {
+    if (!this._labels.size) return;
+    this._labels.clear();
+    this._save();
   }
 
   _onTools(ev) {
@@ -532,6 +539,10 @@ class TilbudsjagtCard extends HTMLElement {
     if (this._built !== (search ? "search" : "product")) this._build(search);
 
     const a = this._attrs;
+    if (search) {
+      if (this._lastQuery !== undefined && a.query !== this._lastQuery) this._resetLabels();
+      this._lastQuery = a.query;
+    }
     if (this._pending !== null && a.query === this._pending) this._pending = null;
     const input = this.shadowRoot.querySelector(".search input");
     if (input && this._pending === null && this.shadowRoot.activeElement !== input) input.value = a.query || "";

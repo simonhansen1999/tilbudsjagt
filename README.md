@@ -69,7 +69,9 @@ Over listen kan du:
 - **Krydse mærker af**, fx *Økologisk*, *Dansk* eller *Glutenfri*, så kun tilbud med de mærker vises. Der vises kun mærker, som skiller tilbuddene ad
 - **Vælge antal**: 5, 10, 20 eller alle
 
-Valgene huskes i din browser.
+Valgene huskes i din browser. Afkrydsede mærker nulstilles ved en ny søgning.
+
+Tilbudsugen mærker af og til varer som *Økologisk*, selv om de ikke er det. Står samme vare hos en anden butik uden mærket, fjernes det derfor – medmindre navnet selv siger *øko* eller *organic*.
 
 **På kortet**
 - Billigste tilbud er fremhævet med **Bedste pris**
