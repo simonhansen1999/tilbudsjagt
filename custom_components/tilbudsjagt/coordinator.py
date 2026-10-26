@@ -77,6 +77,23 @@ class TilbudsjagtCoordinator(DataUpdateCoordinator[TilbudsjagtData]):
     def is_search(self) -> bool:
         return self.mode == MODE_SEARCH
 
+    @property
+    def current_slug(self) -> str:
+        """Den side der hentes: varens eller den aktuelle søgnings."""
+        return normalize_search(self.query) if self.is_search else self.slug
+
+    def watch_spec(self) -> dict:
+        """Det en overvågning skal huske for at finde de samme tilbud som kortet."""
+        filters = {k: v for k, v in self.options.items() if k in DEFAULTS}
+        if self.data is not None:
+            filters["category"] = self.data.category or AUTO
+            filters["unit"] = self.data.unit if self.data.unit != "alle" else AUTO
+        return {
+            "slug": self.current_slug,
+            "query": self.query if self.is_search else "",
+            "filters": filters,
+        }
+
     async def async_set_query(self, query: str) -> None:
         """Ny søgning: hent siden og nulstil kategori."""
         query = query.strip()

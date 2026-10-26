@@ -32,6 +32,11 @@ const ICON = {
   search: "M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Z",
   close: "M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z",
   leaf: "M17 8C8 10 5.9 16.2 3.8 21.3l1.9.7 1-2.3c.5.2 1 .3 1.3.3C19 20 22 3 22 3c-1 2-8 2.2-13 3.2S2 11.5 2 13.5 3.8 17.3 3.8 17.3C7 8 17 8 17 8Z",
+  bell: "M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6v-5c0-3.1-1.6-5.6-4.5-6.3V4a1.5 1.5 0 0 0-3 0v.7C7.6 5.4 6 7.9 6 11v5l-2 2v1h16v-1l-2-2Z",
+  trash: "M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z",
+  edit: "M3 17.3V21h3.8L17.8 9.9l-3.7-3.7L3 17.3ZM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.7 3.7L20.7 7Z",
+  plus: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z",
+  phone: "M17 1H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Zm0 18H7V5h10v14Z",
   check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z",
   open: "M14 3v2h3.6l-9.8 9.8 1.4 1.4L19 6.4V10h2V3h-7ZM19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7Z",
 };
@@ -129,6 +134,66 @@ const STYLE = `
   }
   .search.busy .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  .watch-btn {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 5px 11px 5px 9px; border-radius: 999px;
+    border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; color: #fff;
+    background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+  }
+  .watch-btn:hover { background: rgba(255,255,255,.24); }
+  .watch-btn svg { width: 15px; height: 15px; fill: currentColor; }
+  .watch-btn.on { color: #3a2500; background: linear-gradient(135deg, #ffd76a, #f5a623); box-shadow: 0 2px 10px -2px rgba(245,166,35,.7); }
+
+  .watch-panel { margin: 4px 10px 6px; }
+  .watch-panel:empty { display: none; }
+  .wp {
+    padding: 14px 16px; border-radius: 16px; background: rgba(127,127,127,.08);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tj-a) 35%, transparent);
+  }
+  .wp h3 { margin: 0 0 10px; font-size: 14px; font-weight: 700; color: var(--primary-text-color); display: flex; align-items: center; gap: 8px; }
+  .wp h3 svg { width: 18px; height: 18px; fill: var(--tj-a); }
+  .wp label.price { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--secondary-text-color); }
+  .wp .field {
+    display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; height: 40px; border-radius: 10px;
+    background: var(--tj-surface); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tj-a) 55%, transparent);
+  }
+  .wp .field input {
+    width: 72px; border: 0; outline: 0; background: none; font: inherit; font-size: 18px; font-weight: 800;
+    color: var(--primary-text-color); text-align: right; -moz-appearance: textfield;
+  }
+  .wp .field input::-webkit-inner-spin-button { display: none; }
+  .wp .field span { font-size: 13px; font-weight: 600; color: var(--secondary-text-color); }
+  .wp .hint { font-size: 12px; color: var(--secondary-text-color); margin-top: 6px; }
+  .wp .devices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .wp .actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+  .wp .actions button {
+    border: 0; cursor: pointer; padding: 9px 16px; border-radius: 10px; font: inherit; font-size: 13px; font-weight: 700;
+  }
+  .wp .save { color: #fff; background: var(--tj-a); }
+  .wp .save:disabled { opacity: .5; cursor: default; }
+  .wp .stop { color: #c62828; background: rgba(198,40,40,.12); }
+  .wp .cancel { color: var(--secondary-text-color); background: none; }
+  .wp .msg { font-size: 12.5px; font-weight: 600; }
+  .wp .msg.err { color: #e53935; }
+  .wp .msg.ok { color: #22a35a; }
+
+  .bellart { width: 60px; height: 60px; fill: rgba(255,255,255,.95); transform: rotate(12deg); filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
+  .wp input.query {
+    flex: 1; min-width: 160px; height: 40px; padding: 0 12px; border: 0; outline: 0; border-radius: 10px; box-sizing: border-box;
+    font: inherit; font-size: 15px; font-weight: 600; color: var(--primary-text-color);
+    background: var(--tj-surface); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tj-a) 55%, transparent);
+  }
+  .wp .line { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .row .logo .bell { width: 26px; height: 26px; fill: var(--tj-a); }
+  .wlimit b { color: var(--primary-text-color); font-weight: 800; }
+  .chip.act { cursor: pointer; border: 0; font: inherit; font-size: 11px; font-weight: 700; }
+  .chip.act:hover { background: rgba(127,127,127,.2); }
+  .chip.del.sure { color: #fff; background: #e53935; }
+  .chip.dev svg { opacity: .7; }
+  .badge.hit { background: linear-gradient(135deg, #ffd76a, #f5a623); color: #3a2500; box-shadow: 0 2px 8px -2px rgba(245,166,35,.8); }
+  .badge.hit svg { fill: #3a2500; }
+  .wedit { grid-column: 1 / -1; }
+  .wedit .wp { margin-top: 4px; }
 
   .cats { display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 2px; scrollbar-width: none; }
   .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px 0; }
@@ -232,6 +297,11 @@ const STYLE = `
   }
   .chip.label svg { opacity: 1; }
   .chip.label.organic { --g: #22c55e; }
+  .hitmark {
+    display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffd76a, #f5a623); box-shadow: 0 2px 6px -1px rgba(245,166,35,.7);
+  }
+  .hitmark svg { width: 12px; height: 12px; fill: #3a2500; }
   .chip svg { width: 12px; height: 12px; fill: currentColor; opacity: .8; }
   .chip.limit { color: #7a4300; background: linear-gradient(135deg, #ffe9b8, #ffd98a); box-shadow: inset 0 0 0 1px rgba(160,100,0,.18); }
   .chip.soon { color: #0b4f8a; background: #d9ecff; }
@@ -305,7 +375,8 @@ class TilbudsjagtCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     const st = hass.states[this._config.entity];
-    const sig = st ? `${st.last_updated}|${isoToday()}` : "missing";
+    const hub = this._hub;
+    const sig = st ? `${st.last_updated}|${hub ? hub.last_updated : ""}|${isoToday()}` : "missing";
     if (sig === this._sig && this._built) return;
     this._sig = sig;
     this._update();
@@ -334,6 +405,33 @@ class TilbudsjagtCard extends HTMLElement {
     return this._hass.states[this._config.entity]?.attributes || {};
   }
 
+  /* Prisovervågningens sensor, hvis den er sat op */
+  get _hub() {
+    const states = this._hass.states;
+    if (!this._hubId || !states[this._hubId]) {
+      this._hubId = Object.keys(states).find((id) => id.startsWith("sensor.") && states[id].attributes?.mode === "watchlist");
+    }
+    return this._hubId ? states[this._hubId] : null;
+  }
+
+  /* Overvågningen af denne vare eller søgning */
+  get _watch() {
+    const slug = this._attrs.slug;
+    return slug ? (this._hub?.attributes.watches || []).find((w) => w.slug === slug) || null : null;
+  }
+
+  async _call(service, data, response = false) {
+    if (!response) return this._hass.callService("tilbudsjagt", service, data);
+    const res = await this._hass.callWS({
+      type: "call_service",
+      domain: "tilbudsjagt",
+      service,
+      service_data: data,
+      return_response: true,
+    });
+    return res?.response || {};
+  }
+
   /* Bygger den faste ramme én gang, så søgefeltet ikke mister fokus */
   _build(search) {
     const c = this._config;
@@ -348,6 +446,7 @@ class TilbudsjagtCard extends HTMLElement {
                     <div class="kicker">${esc(c.kicker ?? "Tilbudsjagt")}</div>
                     <div class="title"></div>
                     <div class="sub"></div>
+                    <button type="button" class="watch-btn" hidden></button>
                   </div>
                   <div class="art"></div>
                 </div>
@@ -363,6 +462,7 @@ class TilbudsjagtCard extends HTMLElement {
               </div>`
             : ""
         }
+        <div class="watch-panel"></div>
         <div class="cats"></div>
         <div class="tools"></div>
         <div class="body"></div>
@@ -372,6 +472,8 @@ class TilbudsjagtCard extends HTMLElement {
     const root = this.shadowRoot;
     root.querySelector(".body").addEventListener("click", (ev) => this._onBodyClick(ev));
     root.querySelector(".cats").addEventListener("click", (ev) => this._onCategory(ev));
+    root.querySelector(".watch-btn")?.addEventListener("click", () => this._toggleWatch());
+    root.querySelector(".watch-panel").addEventListener("click", (ev) => this._onWatchPanel(ev));
     root.querySelector(".tools").addEventListener("click", (ev) => this._onTools(ev));
 
     const input = root.querySelector(".search input");
@@ -442,6 +544,144 @@ class TilbudsjagtCard extends HTMLElement {
       localStorage.setItem(this._key, JSON.stringify({ labels: [...this._labels], count: this._count }));
     } catch (e) {
       /* ingen lagring tilgængelig */
+    }
+  }
+
+  get _devices() {
+    const skip = new Set(["notify", "persistent_notification", "send_message"]);
+    return Object.keys(this._hass.services.notify || {})
+      .filter((s) => !skip.has(s))
+      .sort();
+  }
+
+  _deviceName(service) {
+    const name = service.replace(/^mobile_app_/, "").replace(/_/g, " ");
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  _toggleWatch() {
+    this._watchOpen = !this._watchOpen;
+    this._watchMsg = null;
+    this._renderWatchPanel();
+  }
+
+  _devicesHtml(chosen) {
+    const devices = this._devices;
+    if (!devices.length) return `<span class="hint">Ingen enheder fundet. Installér Home Assistant-appen på din telefon.</span>`;
+    return devices
+      .map(
+        (d) =>
+          `<button type="button" class="lbl ${chosen.has(d) ? "on" : ""}" data-device="${esc(d)}"><span class="box">${svg("check")}</span><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;opacity:.7"><path d="${ICON.phone}"/></svg>${esc(this._deviceName(d))}</button>`
+      )
+      .join("");
+  }
+
+  _defaultDevices() {
+    return new Set(this._devices.filter((d) => d.startsWith("mobile_app_")).slice(0, 1));
+  }
+
+  /* Formular til at oprette eller rette en overvågning */
+  _watchForm({ title, query, price, unit, notify, best, save, stop }) {
+    const short = UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr";
+    return `<div class="wp">
+      <h3>${svg("bell")}${esc(title)}</h3>
+      ${query !== undefined ? `<div class="line"><input class="query" type="text" placeholder="Vare, fx smør eller kaffe" value="${esc(query)}"></div>` : ""}
+      <label class="price">Giv besked når prisen er højst
+        <span class="field"><input class="price-in" type="number" inputmode="decimal" step="0.01" min="0.01" value="${price}"><span>${unit ? short : "kr pr. l/kg/stk"}</span></span>
+      </label>
+      ${best ? `<div class="hint">Billigste lige nu: ${kr(best)} ${short}</div>` : ""}
+      <div class="devices">${this._devicesHtml(new Set(notify && notify.length ? notify : this._defaultDevices()))}</div>
+      <div class="actions">
+        <button type="button" class="save">${esc(save)}</button>
+        ${stop ? `<button type="button" class="stop">Stop overvågning</button>` : ""}
+        <button type="button" class="cancel">Luk</button>
+        <span class="msg"></span>
+      </div>
+    </div>`;
+  }
+
+  _readForm(box) {
+    const price = parseFloat(String(box.querySelector(".price-in").value).replace(",", "."));
+    const notify = [...box.querySelectorAll("[data-device].on")].map((b) => b.dataset.device);
+    const query = box.querySelector(".query")?.value.trim();
+    if (box.querySelector(".query") && !query) return { error: "Skriv en vare" };
+    if (!(price > 0)) return { error: "Skriv en pris" };
+    if (!notify.length) return { error: "Vælg mindst én enhed" };
+    return { price, notify, query };
+  }
+
+  _say(box, text, ok) {
+    const msg = box.querySelector(".msg");
+    if (!msg) return;
+    msg.className = `msg ${ok ? "ok" : "err"}`;
+    msg.textContent = text;
+  }
+
+  _toggleWatch() {
+    this._watchOpen = !this._watchOpen;
+    this._renderWatchPanel();
+  }
+
+  _renderWatchPanel() {
+    const box = this.shadowRoot.querySelector(".watch-panel");
+    if (!this._watchOpen) {
+      box.innerHTML = "";
+      return;
+    }
+    const a = this._attrs;
+    if (a.mode === "watchlist") {
+      box.innerHTML = this._watchForm({ title: "Ny overvågning", query: "", price: "", unit: null, save: "Start overvågning" });
+      box.querySelector(".query").focus();
+      return;
+    }
+    const watch = this._watch;
+    const best = (a.offers || [])[0]?.unit_price;
+    const name = a.mode === "search" ? `“${a.query}”` : this._config.title || a.friendly_name || "varen";
+    box.innerHTML = this._watchForm({
+      title: `Overvåg ${name}`,
+      price: watch ? watch.price : best ? Math.floor(best * 100) / 100 : "",
+      unit: a.unit || "ltr",
+      notify: watch?.notify,
+      best,
+      save: watch ? "Gem ændringer" : "Start overvågning",
+      stop: !!watch,
+    });
+  }
+
+  async _onWatchPanel(ev) {
+    const box = this.shadowRoot.querySelector(".watch-panel");
+    const device = ev.target.closest("[data-device]");
+    if (device) return device.classList.toggle("on");
+    if (ev.target.closest(".cancel")) return this._toggleWatch();
+    const watch = this._watch;
+    try {
+      if (ev.target.closest(".stop") && watch) {
+        await this._call("unwatch", { watch_id: watch.id });
+        this._watchOpen = false;
+        return this._renderWatchPanel();
+      }
+      if (!ev.target.closest(".save")) return;
+      const form = this._readForm(box);
+      if (form.error) return this._say(box, form.error, false);
+      box.querySelector(".save").disabled = true;
+      if (this._attrs.mode === "watchlist") {
+        const out = await this._call("watch", { query: form.query, price: form.price, notify: form.notify }, true);
+        this._say(box, `Overvåger nu ${out.name || form.query}`, true);
+        box.querySelector(".query").value = "";
+      } else if (watch) {
+        await this._call("update_watch", { watch_id: watch.id, price: form.price, notify: form.notify });
+        this._watchOpen = false;
+        this._renderWatchPanel();
+      } else {
+        await this._call("watch", { entity_id: this._config.entity, price: form.price, notify: form.notify }, true);
+        this._watchOpen = false;
+        this._renderWatchPanel();
+      }
+    } catch (err) {
+      this._say(box, err?.message || "Kunne ikke gemme", false);
+    } finally {
+      const save = box.querySelector(".save");
+      if (save) save.disabled = false;
     }
   }
 
@@ -543,6 +783,7 @@ class TilbudsjagtCard extends HTMLElement {
   }
 
   _update() {
+    if (this._attrs.mode === "watchlist") return this._updateHub();
     const search = this._attrs.mode === "search";
     if (this._built !== (search ? "search" : "product")) this._build(search);
 
@@ -563,6 +804,159 @@ class TilbudsjagtCard extends HTMLElement {
     this._renderFoot();
   }
 
+  /* ---------- Prisovervågning ---------- */
+
+  _buildHub() {
+    const c = this._config;
+    const theme = THEMES[c.theme] || THEMES.blue;
+    this.shadowRoot.innerHTML = `<style>${STYLE}</style>
+      <ha-card style="--tj-a:${theme.a};--tj-b:${theme.b};--tj-c:${theme.c};--tj-hero:${theme.hero};--tj-surface:var(--ha-card-background, var(--card-background-color, #fff))">
+        <div class="hero">
+          <div class="hero-grid">
+            <div>
+              <div class="kicker">${esc(c.kicker ?? "Tilbudsjagt")}</div>
+              <div class="title">${esc(c.title || "Prisovervågning")}</div>
+              <div class="sub"></div>
+              <button type="button" class="watch-btn">${svg("plus")}Ny overvågning</button>
+            </div>
+            <div class="art"><svg class="bellart" viewBox="0 0 24 24"><path d="${ICON.bell}"/></svg></div>
+          </div>
+        </div>
+        <div class="watch-panel"></div>
+        <div class="body"></div>
+        <div class="foot"></div>
+      </ha-card>`;
+    const root = this.shadowRoot;
+    root.querySelector(".watch-btn").addEventListener("click", () => this._toggleWatch());
+    root.querySelector(".watch-panel").addEventListener("click", (ev) => this._onWatchPanel(ev));
+    root.querySelector(".body").addEventListener("click", (ev) => this._onHubClick(ev));
+    this._editing = null;
+    this._confirm = null;
+    this._built = "watchlist";
+  }
+
+  _updateHub() {
+    if (this._built !== "watchlist") this._buildHub();
+    const a = this._attrs;
+    const watches = a.watches || [];
+    const hits = watches.filter((w) => w.hit).length;
+    this.shadowRoot.querySelector(".sub").textContent = watches.length
+      ? `${watches.length} ${watches.length === 1 ? "overvågning" : "overvågninger"}${hits ? ` · ${hits} under din pris` : ""}`
+      : "Få besked når en vare bliver billig";
+    // Bevar en åben redigering, mens man skriver
+    if (this._editing && this.shadowRoot.querySelector(".wedit")?.contains(this.shadowRoot.activeElement)) return;
+    this._renderHub();
+    this._renderFoot();
+  }
+
+  _renderHub() {
+    const body = this.shadowRoot.querySelector(".body");
+    const watches = [...(this._attrs.watches || [])].sort((x, y) => Number(y.hit) - Number(x.hit) || x.name.localeCompare(y.name));
+    if (!watches.length) {
+      body.innerHTML = `<div class="empty">Ingen overvågninger endnu.<br>Tryk <b>Ny overvågning</b> eller 🔔 på et tilbudskort.</div>`;
+      return;
+    }
+    body.innerHTML = `<div class="list">${watches.map((w) => this._hubRow(w)).join("")}</div>`;
+    body.querySelectorAll(".logo img").forEach((img) => img.addEventListener("error", () => img.remove()));
+  }
+
+  _hubRow(w) {
+    const short = UNIT_SHORT[w.unit] ? `kr/${UNIT_SHORT[w.unit]}` : "kr";
+    const b = w.best;
+    const logo = b
+      ? `<span>${esc(initials(b.chain))}</span><img src="${esc(b.logo)}" referrerpolicy="no-referrer" alt="">`
+      : `<svg class="bell" viewBox="0 0 24 24"><path d="${ICON.bell}"/></svg>`;
+    const status = w.error
+      ? "Kunne ikke hente tilbud"
+      : b
+      ? `Billigst nu hos ${esc(b.chain)} · ${esc(dateRange(b.start, b.end))}`
+      : "Intet tilbud lige nu";
+    const diff = b ? Number(b.unit_price) - Number(w.price) : 0;
+    const devices = (w.notify || [])
+      .map((d) => `<span class="chip dev">${svg("phone")}${esc(this._deviceName(d))}</span>`)
+      .join("");
+    const sure = this._confirm === w.id;
+    const editing = this._editing === w.id;
+    return `<div class="row ${w.hit ? "top" : ""}" data-id="${esc(w.id)}" data-url="${esc(b ? b.url : "")}">
+      <div class="logo">${logo}</div>
+      <div class="main">
+        <div class="head">
+          <span class="chain">${esc(w.name)}</span>
+          ${w.hit ? `<span class="badge hit">${svg("bell")}Under din pris</span>` : ""}
+        </div>
+        <div class="pack wlimit">Højst <b>${kr(w.price)} ${short}</b></div>
+        <div class="each">${status}</div>
+      </div>
+      <div class="price">
+        ${b ? `<div class="unit-price">${kr(b.unit_price)}<small>${short}</small></div>` : `<div class="unit-price">–</div>`}
+        ${b && !w.hit ? `<div class="diff">+${kr(diff)} over</div>` : ""}
+      </div>
+      <div class="chips">
+        ${devices}
+        <button type="button" class="chip act edit">${svg("edit")}Ret</button>
+        <button type="button" class="chip act del ${sure ? "sure" : ""}">${svg("trash")}${sure ? "Tryk igen for at slette" : "Slet"}</button>
+      </div>
+      ${
+        editing
+          ? `<div class="wedit">${this._watchForm({
+              title: `Ret ${w.name}`,
+              price: w.price,
+              unit: w.unit,
+              notify: w.notify,
+              best: b?.unit_price,
+              save: "Gem ændringer",
+            })}</div>`
+          : ""
+      }
+    </div>`;
+  }
+
+  async _onHubClick(ev) {
+    const row = ev.target.closest(".row");
+    if (!row) return;
+    const id = row.dataset.id;
+    const edit = ev.target.closest(".wedit");
+    if (edit) {
+      const device = ev.target.closest("[data-device]");
+      if (device) return device.classList.toggle("on");
+      if (ev.target.closest(".cancel")) {
+        this._editing = null;
+        return this._renderHub();
+      }
+      if (!ev.target.closest(".save")) return;
+      const form = this._readForm(edit);
+      if (form.error) return this._say(edit, form.error, false);
+      try {
+        await this._call("update_watch", { watch_id: id, price: form.price, notify: form.notify });
+        this._editing = null;
+        this._renderHub();
+      } catch (err) {
+        this._say(edit, err?.message || "Kunne ikke gemme", false);
+      }
+      return;
+    }
+    if (ev.target.closest(".edit")) {
+      this._editing = this._editing === id ? null : id;
+      this._confirm = null;
+      return this._renderHub();
+    }
+    if (ev.target.closest(".del")) {
+      if (this._confirm !== id) {
+        this._confirm = id;
+        clearTimeout(this._confirmTimer);
+        this._confirmTimer = setTimeout(() => {
+          this._confirm = null;
+          this._renderHub();
+        }, 4000);
+        return this._renderHub();
+      }
+      this._confirm = null;
+      await this._call("unwatch", { watch_id: id });
+      return;
+    }
+    if (row.dataset.url) window.open(row.dataset.url, "_blank", "noopener");
+  }
+
   _renderHero(search) {
     const c = this._config;
     const a = this._attrs;
@@ -576,6 +970,12 @@ class TilbudsjagtCard extends HTMLElement {
     if (c.subtitle == null && search && a.category) parts.push(a.category);
     if (c.subtitle == null && a.include_deposit) parts.push("inkl. pant");
     root.querySelector(".sub").textContent = parts.join(" · ");
+    const btn = root.querySelector(".watch-btn");
+    const short = UNIT_SHORT[unit] ? `kr/${UNIT_SHORT[unit]}` : "kr";
+    const watch = this._watch;
+    btn.hidden = search && !a.query;
+    btn.classList.toggle("on", !!watch);
+    btn.innerHTML = watch ? `${svg("bell")}Overvåget · højst ${kr(watch.price)} ${short}` : `${svg("bell")}Overvåg pris`;
     const art = c.image ? `<img src="${esc(c.image)}" alt="">` : unit === "ltr" ? CAN : TAG;
     const holder = root.querySelector(".art");
     if (holder.dataset.art !== art) {
@@ -632,6 +1032,7 @@ class TilbudsjagtCard extends HTMLElement {
       <div class="main">
         <div class="head">
           <span class="chain">${esc(o.chain)}</span>
+          ${ctx.watch && Number(o.unit_price) <= ctx.watch ? `<span class="hitmark" title="Under din pris">${svg("bell")}</span>` : ""}
           ${top ? `<span class="badge">${svg("star")}Bedste pris</span>` : ""}
         </div>
         ${ctx.showNames ? `<div class="name">${esc(o.name)}</div>` : ""}
@@ -684,6 +1085,7 @@ class TilbudsjagtCard extends HTMLElement {
       today: isoToday(),
       showNames: new Set(offers.map((o) => o.name)).size > 1,
       labels: new Set(this._labelCounts().map(([l]) => l)),
+      watch: Number(this._watch?.price) || 0,
     };
     body.innerHTML = `<div class="list">${offers.map((o, i) => this._row(o, i, ctx)).join("")}</div>`;
     body.querySelectorAll(".logo img").forEach((img) => img.addEventListener("error", () => img.remove()));

@@ -21,6 +21,7 @@ from homeassistant.helpers.selector import (
 )
 
 from .api import TilbudsugenError, async_fetch_offers, normalize_search
+from .watch import notify_targets
 from .const import (
     ALL,
     AUTO,
@@ -46,6 +47,7 @@ from .const import (
     KNOWN_CHAINS,
     MODE_PRODUCT,
     MODE_SEARCH,
+    MODE_WATCHLIST,
     NEW_DEFAULTS,
     PACKAGES,
     UNITS,
@@ -102,6 +104,11 @@ def _filter_schema(
     return vol.Schema(fields)
 
 
+def device_label(target: str) -> str:
+    """'mobile_app_simons_iphone' -> 'Simons iphone'."""
+    return target.removeprefix("mobile_app_").replace("_", " ").capitalize()
+
+
 def _clean(user_input: dict[str, Any]) -> dict[str, Any]:
     """NumberSelector giver floats; gem hele tal."""
     for key in (CONF_MIN_UNITS, CONF_MAX_RESULTS, CONF_UPDATE_HOURS):
@@ -121,7 +128,17 @@ class TilbudsjagtConfigFlow(ConfigFlow, domain=DOMAIN):
         self._categories: list[str] = []
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
-        return self.async_show_menu(step_id="user", menu_options=[MODE_PRODUCT, MODE_SEARCH])
+        return self.async_show_menu(step_id="user", menu_options=[MODE_PRODUCT, MODE_SEARCH, MODE_WATCHLIST])
+
+    async def async_step_watchlist(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Én samlet liste med alle prisovervågninger."""
+        await self.async_set_unique_id(MODE_WATCHLIST)
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title="Prisovervågning", data={CONF_MODE: MODE_WATCHLIST}, options={})
+
+    async def async_step_import(self, import_data: dict[str, Any]) -> ConfigFlowResult:
+        """Oprettes automatisk første gang, der overvåges fra kortet eller en automation."""
+        return await self.async_step_watchlist()
 
     async def async_step_product(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}
@@ -188,6 +205,8 @@ class TilbudsjagtConfigFlow(ConfigFlow, domain=DOMAIN):
 class TilbudsjagtOptionsFlow(OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         mode = self.config_entry.data.get(CONF_MODE, MODE_PRODUCT)
+        if mode == MODE_WATCHLIST:
+            return self.async_show_menu(step_id="init", menu_options=["add", "remove"])
         if user_input is not None:
             options = _clean(user_input)
             if mode == MODE_SEARCH:
@@ -201,4 +220,73 @@ class TilbudsjagtOptionsFlow(OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=_filter_schema(mode, dict(self.config_entry.options), chains, categories),
+        )
+
+    # Prisovervågning: tilføj og fjern uden at genstarte integrationen
+
+    def _done(self) -> ConfigFlowResult:
+        return self.async_create_entry(data=dict(self.config_entry.options))
+
+    async def async_step_add(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+        targets = notify_targets(self.hass)
+        if user_input is not None:
+            query = user_input[CONF_SEARCH].strip()
+            if not user_input.get("notify"):
+                errors["notify"] = "no_devices"
+            else:
+                await self.config_entry.runtime_data.async_add(
+                    name=user_input.get(CONF_NAME) or query.title(),
+                    slug=normalize_search(query),
+                    query=query,
+                    price=float(user_input["price"]),
+                    notify=user_input["notify"],
+                )
+                return self._done()
+
+        return self.async_show_form(
+            step_id="add",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_SEARCH): TextSelector(),
+                    vol.Optional(CONF_NAME): TextSelector(),
+                    vol.Required("price"): NumberSelector(
+                        NumberSelectorConfig(min=0.01, max=1000, step=0.01, mode=NumberSelectorMode.BOX, unit_of_measurement="kr")
+                    ),
+                    vol.Required("notify", default=targets[:1]): SelectSelector(
+                        SelectSelectorConfig(
+                            options=[{"value": t, "label": device_label(t)} for t in targets],
+                            multiple=True,
+                            mode=SelectSelectorMode.LIST,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_remove(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        watchlist = self.config_entry.runtime_data
+        if user_input is not None:
+            for watch_id in user_input.get("watches", []):
+                await watchlist.async_remove(watch_id)
+            return self._done()
+        if not watchlist.watches:
+            return self.async_abort(reason="no_watches")
+        return self.async_show_form(
+            step_id="remove",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional("watches", default=[]): SelectSelector(
+                        SelectSelectorConfig(
+                            options=[
+                                {"value": w["id"], "label": f"{w['name']} – højst {w['price']:.2f} kr".replace(".", ",")}
+                                for w in watchlist.watches
+                            ],
+                            multiple=True,
+                            mode=SelectSelectorMode.LIST,
+                        )
+                    )
+                }
+            ),
         )

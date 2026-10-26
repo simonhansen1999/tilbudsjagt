@@ -8,27 +8,37 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .card import async_register_card
-from .const import CONF_MODE, DOMAIN, MODE_SEARCH
+from .const import CONF_MODE, DOMAIN, MODE_SEARCH, MODE_WATCHLIST
 from .coordinator import TilbudsjagtConfigEntry, TilbudsjagtCoordinator
+from .services import async_setup_services
+from .watchlist import WatchlistCoordinator
 
+PLATFORMS = {
+    MODE_SEARCH: [Platform.SENSOR, Platform.SELECT, Platform.TEXT],
+    MODE_WATCHLIST: [Platform.BINARY_SENSOR, Platform.SENSOR],
+}
 PRODUCT_PLATFORMS = [Platform.SENSOR]
-SEARCH_PLATFORMS = [Platform.SENSOR, Platform.SELECT, Platform.TEXT]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 def _platforms(entry: TilbudsjagtConfigEntry) -> list[Platform]:
-    return SEARCH_PLATFORMS if entry.data.get(CONF_MODE) == MODE_SEARCH else PRODUCT_PLATFORMS
+    return PLATFORMS.get(entry.data.get(CONF_MODE), PRODUCT_PLATFORMS)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Registrér det medfølgende dashboard-kort."""
+    """Registrér dashboard-kortet og tjenesterne."""
     await async_register_card(hass)
+    async_setup_services(hass)
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: TilbudsjagtConfigEntry) -> bool:
-    coordinator = TilbudsjagtCoordinator(hass, entry)
+    if entry.data.get(CONF_MODE) == MODE_WATCHLIST:
+        coordinator = WatchlistCoordinator(hass, entry)
+        await coordinator.async_load()
+    else:
+        coordinator = TilbudsjagtCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
     entry.async_on_unload(entry.add_update_listener(_async_reload))

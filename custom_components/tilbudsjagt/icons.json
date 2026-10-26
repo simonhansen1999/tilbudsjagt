@@ -1,0 +1,23 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "price_alarm": {
+        "default": "mdi:bell-outline",
+        "state": {
+          "on": "mdi:bell-ring"
+        }
+      }
+    }
+  },
+  "services": {
+    "watch": {
+      "service": "mdi:bell-plus"
+    },
+    "update_watch": {
+      "service": "mdi:bell-cog"
+    },
+    "unwatch": {
+      "service": "mdi:bell-off"
+    }
+  }
+}

@@ -31,6 +31,7 @@ CONF_UPDATE_HOURS = "update_hours"
 
 MODE_PRODUCT = "product"
 MODE_SEARCH = "search"
+MODE_WATCHLIST = "watchlist"
 
 ALL = "alle"
 AUTO = "auto"
